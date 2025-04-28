@@ -183,7 +183,13 @@ const options = {
               schema: {
                 type: "object",
                 properties: {
-                  names: {
+                  fName: {
+                    type: "string",
+                  },
+                  lName: {
+                    type: "string",
+                  },
+                  idCard: {
                     type: "string",
                   },
                   address: {
