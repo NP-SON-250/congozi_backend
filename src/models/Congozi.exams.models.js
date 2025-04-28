@@ -1,7 +1,11 @@
 import mongoose from "mongoose";
 const examsSchema = new mongoose.Schema({
   title: { type: String },
-  type: { type: String },
+  type:  {
+    type: String,
+    enum: ["test", "learn"],
+    default: "learn",
+  },
   number: { type: String },
   fees: { type: String },
   questions: [{ type: mongoose.Schema.ObjectId, ref: "questions" }],
