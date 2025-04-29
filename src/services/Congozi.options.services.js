@@ -103,13 +103,21 @@ export const deleteOption = async (id) => {
     if (!isExist) {
       throw new Error("Option not found");
     }
+
+    // Remove the option ID from the corresponding question's options array
+    await Questions.updateOne(
+      { _id: isExist.question }, // assumes each option has a `question` reference
+      { $pull: { options: id } }
+    );
+
     await Options.findByIdAndDelete(id);
+
     return {
       message: "Option deleted",
       deletedOption: isExist,
     };
   } catch (error) {
-    throw new Error(`Error deleting opton: ${error.message}`);
+    throw new Error(`Error deleting option: ${error.message}`);
   }
 };
 // Service to get all options for given question

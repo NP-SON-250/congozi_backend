@@ -1,13 +1,19 @@
 import Exams from "../models/Congozi.exams.models";
-
+import Purchases from "../models/Congozi.purchases.models";
+import responsesModel from "../models/Congozi.responses.models";
+import UnpaidExams from "../models/Congozi.unpaidexams.models";
+import WaittingExams from "../models/Congozi.waittingexams.models";
+import PassedExams from "../models/Congozi.passedexams.models";
+import FailledExams from "../models/Congozi.failedexams.models";
+import ExpiredExams from "../models/Congozi.expiredexams.models";
+import TotalUserExams from "../models/Congozi.totaluserexams.models";
 // Service to get test exam wth number
 export const getExamByNumber = async (number) => {
   try {
-
-    const {type} = "Test" || "test";
+    const { type } = "Test" || "test";
     const isExist = await Exams.findOne({
       number,
-      type: { $regex: /^test$/, $options: "i" }
+      type: { $regex: /^test$/, $options: "i" },
     }).populate({
       path: "questions",
       populate: {
@@ -122,6 +128,32 @@ export const deleteExam = async (id) => {
     if (!isExist) {
       throw new Error("Exam not found");
     }
+    await Purchases.deleteMany({
+      itemId: id,
+      itemType: "exams",
+    });
+    await responsesModel.deleteMany({
+      examId: id,
+    });
+    await UnpaidExams.deleteMany({
+      exam: id,
+    });
+    await WaittingExams.deleteMany({
+      exam: id,
+    });
+
+    await PassedExams.deleteMany({
+      exam: id,
+    });
+    await FailledExams.deleteMany({
+      exam: id,
+    });
+    await ExpiredExams.deleteMany({
+      exam: id,
+    });
+    await TotalUserExams.deleteMany({
+      exam: id,
+    });
     await Exams.findByIdAndDelete(id);
     return {
       message: "Exam deleted",
@@ -158,5 +190,3 @@ export const getExamById = async (id) => {
     throw new Error(`Error retrieving exam: ${error.message}`);
   }
 };
-
-

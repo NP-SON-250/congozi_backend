@@ -718,6 +718,51 @@ const options = {
     },
     //Options actions
     "/api/v1/options/{id}": {
+      post: {
+        tags: ["Options"],
+        summary: "Create option",
+        description: "Create new option",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: {
+              type: "string",
+            },
+          },
+        ],
+        requestBody: {
+          content: {
+            "multipart/form-data": {
+              schema: {
+                type: "object",
+                properties: {
+                  text: {
+                    type: "string",
+                  },
+                  isCorrect: {
+                    type: "boolean",
+                    enum: ["true", "false"],
+                  },
+                },
+              },
+            },
+          },
+          required: true,
+        },
+        responses: {
+          201: {
+            description: "New option added",
+          },
+          400: {
+            description: "Bad Request",
+          },
+          500: {
+            description: "Internal Server Error",
+          },
+        },
+      },
       put: {
         tags: ["Options"],
         summary: "Update option",
@@ -797,51 +842,6 @@ const options = {
       },
     },
     "/api/v1/options/{question}": {
-      post: {
-        tags: ["Options"],
-        summary: "Create option",
-        description: "Create new option",
-        parameters: [
-          {
-            name: "question",
-            in: "path",
-            required: true,
-            schema: {
-              type: "string",
-            },
-          },
-        ],
-        requestBody: {
-          content: {
-            "multipart/form-data": {
-              schema: {
-                type: "object",
-                properties: {
-                  text: {
-                    type: "string",
-                  },
-                  isCorrect: {
-                    type: "boolean",
-                    enum: ["true", "false"],
-                  },
-                },
-              },
-            },
-          },
-          required: true,
-        },
-        responses: {
-          201: {
-            description: "New option added",
-          },
-          400: {
-            description: "Bad Request",
-          },
-          500: {
-            description: "Internal Server Error",
-          },
-        },
-      },
       get: {
         tags: ["Options"],
         summary: "Read option by question id",

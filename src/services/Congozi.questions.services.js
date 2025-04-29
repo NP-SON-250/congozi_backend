@@ -94,7 +94,15 @@ export const deleteQuestion = async (id) => {
     if (!isExist) {
       throw new Error("Question not found");
     }
+
+    // Remove the question ID from the related exam's questions array (if it exists)
+    await Exams.updateOne(
+      { _id: isExist.exam },
+      { $pull: { questions: id } }
+    );
+
     await Questions.findByIdAndDelete(id);
+
     return {
       message: "Question deleted",
       deletedQuestion: isExist,

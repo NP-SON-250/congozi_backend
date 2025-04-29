@@ -1,5 +1,9 @@
 import Accounts from "../models/Congozi.accounts.models";
-
+import Purchases from "../models/Congozi.purchases.models";
+import ExpiredAccounts from "../models/Congozi.expiredaccounts.models";
+import TotalUserAccounts from "../models/Congozi.totaluseraccounts.models";
+import UnpaidAccounts from "../models/Congozi.unpaidaccounts.models";
+import WaittingAccounts from "../models/Congozi.waittingaccounts.models";
 // Service to create account
 export const createAccount = async (accountData) => {
   const { title, validIn, fees, grantedexams } = accountData;
@@ -69,6 +73,23 @@ export const deleteAccount = async (id) => {
     if (!isExist) {
       throw new Error("Account not found");
     }
+    await Purchases.deleteMany({
+      itemId: id,
+      itemType: "exams",
+    });
+
+
+    await WaittingAccounts.deleteMany({
+      account: id,
+    });
+    await UnpaidAccounts.deleteMany({
+      account: id,
+    });await TotalUserAccounts.deleteMany({
+      account: id,
+    });
+    await ExpiredAccounts.deleteMany({
+      account: id,
+    });
     await Accounts.findByIdAndDelete(id);
     return {
       message: "Account deleted",
