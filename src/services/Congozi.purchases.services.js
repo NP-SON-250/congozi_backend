@@ -7,6 +7,10 @@ import Exams from "../models/Congozi.exams.models";
 import Accounts from "../models/Congozi.accounts.models";
 import TotalUserExams from "../models/Congozi.totaluserexams.models";
 import TotalUserAccounts from "../models/Congozi.totaluseraccounts.models";
+import PassedExams from "../models/Congozi.passedexams.models";
+import FailledExams from "../models/Congozi.failedexams.models";
+import ExpiredExams from "../models/Congozi.expiredexams.models";
+import ExpiredAccounts from "../models/Congozi.expiredaccounts.models";
 //Code generator
 const generateAccessCode = () => {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -67,7 +71,7 @@ export const makePaidPurchase = async (userId, userRole, itemId) => {
       accessCode: generateAccessCode(),
       startDate: new Date(),
       endDate,
-      status: "complete"
+      status: "complete",
     });
     //Find saved purchase item
     let items = null;
@@ -76,7 +80,7 @@ export const makePaidPurchase = async (userId, userRole, itemId) => {
     } else if (savedPurchase.itemType === "accounts") {
       items = await Accounts.findById(savedPurchase.itemId);
     }
-    
+
     // Save in unpaid exams /accounts
     if (itemType === "exams") {
       await WaittingExams.create({
@@ -203,7 +207,6 @@ export const makePurchase = async (userId, userRole, itemId) => {
   }
 };
 
-
 // Service to update a purchase
 export const updatePurchase = async (id, purchaseData) => {
   const { status } = purchaseData;
@@ -267,9 +270,9 @@ export const updatePurchase = async (id, purchaseData) => {
   }
 };
 // Service to get all purchases for admin
-export const getUsersPurchases = async (userId,) => {
+export const getUsersPurchases = async (userId) => {
   try {
-    const purchases = await Purchases.find({purchasedBy: userId,})
+    const purchases = await Purchases.find({ purchasedBy: userId })
       .populate("purchasedBy")
       .populate("itemId")
       .sort({ createdAt: -1 });
@@ -377,6 +380,38 @@ export const deleteUserPurchase = async (purchaseId) => {
       throw new Error("Purchase not found");
     }
 
+    const itemId = purchase.itemId;
+    await UnpaidExams.deleteMany({
+      exam: itemId,
+    });
+    await WaittingExams.deleteMany({
+      exam: itemId,
+    });
+
+    await PassedExams.deleteMany({
+      exam: itemId,
+    });
+    await FailledExams.deleteMany({
+      exam: itemId,
+    });
+    await ExpiredExams.deleteMany({
+      exam: itemId,
+    });
+    await TotalUserExams.deleteMany({
+      exam: itemId,
+    });
+    await WaittingAccounts.deleteMany({
+      account: itemId,
+    });
+    await UnpaidAccounts.deleteMany({
+      account: itemId,
+    });
+    await TotalUserAccounts.deleteMany({
+      account: itemId,
+    });
+    await ExpiredAccounts.deleteMany({
+      account: itemId,
+    });
     // Delete the purchase
     await Purchases.findByIdAndDelete(purchaseId);
 
