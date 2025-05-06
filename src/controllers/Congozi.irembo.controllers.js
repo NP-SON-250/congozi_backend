@@ -8,7 +8,7 @@ export const initiatePayment = async (req, res) => {
       amount,
       reference,
       description,
-      callbackUrl: 'https://yourdomain.com/irembo/callback', // Update this
+      callbackUrl: 'payment.operations@irembo.com',
     });
 
     const payment = await pushPayment({

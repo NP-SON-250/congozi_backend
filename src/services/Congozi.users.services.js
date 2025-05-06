@@ -2,21 +2,54 @@ import Users from "../models/Congozi.users.model";
 import bcrypt from "bcrypt";
 import { uploadToCloud } from "../helper/cloud";
 
+// Service to Login a user with tin or companyName
+export const loginSchool = async ({ identifier, password }) => {
+  const user = await Users.findOne({
+    $or: [{ tin: identifier }, { companyName: identifier }],
+  });
+
+  if (!user) {
+    throw new Error("User not found with provided credentials");
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    throw new Error("Invalid password");
+  }
+
+  return user;
+};
 // Service to create user
 export const createUser = async (userData, file) => {
-  const { fName, lName, idCard, address, phone, email, password, role } = userData;
+  const {
+    fName,
+    lName,
+    idCard,
+    address,
+    phone,
+    email,
+    password,
+    role,
+    companyName,
+    tin,
+  } = userData;
 
   try {
     // Check if user already exists by email, ID card, or phone
-    const [emailExist, idCardExist, phoneExist] = await Promise.all([
-      Users.findOne({ email }),
-      Users.findOne({ idCard }),
-      Users.findOne({ phone }),
-    ]);
+    const [emailExist, idCardExist, phoneExist, companyNameExist, tinExist] =
+      await Promise.all([
+        Users.findOne({ email }),
+        Users.findOne({ idCard }),
+        Users.findOne({ phone }),
+        Users.findOne({ companyName }),
+        Users.findOne({ tin }),
+      ]);
 
     if (emailExist) throw new Error("Email is already taken");
     if (idCardExist) throw new Error("ID card is already used");
     if (phoneExist) throw new Error("Phone number is already used");
+    if (companyNameExist) throw new Error("Company Name is already used");
+    if (tinExist) throw new Error("Tin number is already used");
 
     // Upload profile image if file is provided
     let profileUrl = null;
@@ -36,6 +69,8 @@ export const createUser = async (userData, file) => {
       address,
       phone,
       email,
+      companyName,
+      tin,
       password: hashedPassword,
       profile: profileUrl,
     };
@@ -55,7 +90,7 @@ export const createUser = async (userData, file) => {
   }
 };
 
-// Service to Login a user
+// Service to Login a user with phone or email
 export const loginUser = async ({ identifier, password }) => {
   const isEmail = /^\S+@\S+\.\S+$/.test(identifier);
 

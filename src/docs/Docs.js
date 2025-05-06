@@ -135,6 +135,45 @@ const options = {
         },
       },
     },
+    "/api/v1/users/auth/school": {
+      post: {
+        tags: ["Users"],
+        summary: "User Login",
+        description:
+          "User login using a single field for tin number or company name",
+        requestBody: {
+          content: {
+            "multipart/form-data": {
+              schema: {
+                type: "object",
+                properties: {
+                  identifier: {
+                    type: "string",
+                    description: "Tin number or company name",
+                  },
+                  password: {
+                    type: "string",
+                  },
+                },
+                required: ["identifier", "password"],
+              },
+            },
+          },
+          required: true,
+        },
+        responses: {
+          200: {
+            description: "You logged in successfully",
+          },
+          400: {
+            description: "Bad Request",
+          },
+          500: {
+            description: "Internal Server Error",
+          },
+        },
+      },
+    },
 
     "/api/v1/users/{id}": {
       get: {
@@ -202,6 +241,12 @@ const options = {
                     type: "string",
                   },
                   password: {
+                    type: "string",
+                  },
+                  companyName: {
+                    type: "string",
+                  },
+                  tin: {
                     type: "string",
                   },
                   profile: {
@@ -293,6 +338,12 @@ const options = {
                     type: "string",
                   },
                   password: {
+                    type: "string",
+                  },
+                  companyName: {
+                    type: "string",
+                  },
+                  tin: {
                     type: "string",
                   },
                   profile: {

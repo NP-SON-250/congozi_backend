@@ -5,6 +5,8 @@ const usersSchema = new mongoose.Schema({
   idCard: { type: String, unique: true },
   address: { type: String },
   phone: { type: String, unique: true },
+  companyName: { type: String },
+  tin: { type: String },
   email: {
     type: String,
     unique: true,
@@ -19,7 +21,7 @@ const usersSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ["student", "admin", "school"],
-    default: "admin",
+    default: "student",
   },
   purchasedExams: [{ type: mongoose.Schema.ObjectId, ref: "exams" }],
   purchasedAccounts: [{ type: mongoose.Schema.ObjectId, ref: "accounts" }],

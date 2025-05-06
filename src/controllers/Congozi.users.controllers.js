@@ -1,73 +1,71 @@
-import * as userService from "../services/Congozi.users.services";
+import * as userService from "../services/Congozi.users.services.js";
 import {
   validateLoginUser,
   validateUpdateUser,
-} from "../validation/Congozi.users.validation";
-import generateToken from "../utils/generateToken";
-import Users from "../models/Congozi.users.model";
+} from "../validation/Congozi.users.validation.js";
+import generateToken from "../utils/generateToken.js";
+import Users from "../models/Congozi.users.model.js";
 import bcrypt from "bcrypt";
-import { uploadToCloud } from "../helper/cloud";
+import { uploadToCloud } from "../helper/cloud.js";
 
-// create user controller
-export const createUsers = async (req, res, file) => {
-  const { fName, lName, idCard, address, phone, email, password, role } =
-    req.body;
+// Create User
+export const createUsers = async (req, res) => {
+  const {
+    fName,
+    lName,
+    idCard,
+    address,
+    phone,
+    email,
+    password,
+    role,
+    companyName,
+    tin,
+  } = req.body;
+
   try {
-    // Check if user already exists by email, ID card, or phone
-    const [emailExist, idCardExist, phoneExist] = await Promise.all([
-      Users.findOne({ email }),
-      Users.findOne({ idCard }),
-      Users.findOne({ phone }),
-    ]);
-    if (emailExist) {
-      return res.status(400).json({
-        status: "400",
-        message: "Email is already taken",
-      });
+    const [emailExist, idCardExist, phoneExist, companyNameExist, tinExist] =
+      await Promise.all([
+        Users.findOne({ email }),
+        Users.findOne({ idCard }),
+        Users.findOne({ phone }),
+        Users.findOne({ companyName }),
+        Users.findOne({ tin }),
+      ]);
+
+    if (emailExist || idCardExist || phoneExist || companyNameExist || tinExist) {
+      const message = emailExist ? "Email is already taken" :
+                      idCardExist ? "ID card is already used" :
+                      phoneExist ? "Phone number is already used" :
+                      tinExist ? "TIN number is already used" :
+                      "Company name is already used";
+      return res.status(400).json({ status: "400", message });
     }
 
-    if (idCardExist) {
-      return res.status(400).json({
-        status: "400",
-        message: "ID card is already used",
-      });
-    }
-    if (phoneExist) {
-      return res.status(400).json({
-        status: "400",
-        message: "Phone number is already used",
-      });
-    }
-    // Upload profile image if file is provided
-    let savedProfile;
-    if (req.file) savedProfile = await uploadToCloud(req.file, res);
+    let profileImage = null;
+    if (req.file) profileImage = await uploadToCloud(req.file);
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Prepare user object
-    const newUserData = {
+    const user = await Users.create({
       fName,
       lName,
       idCard,
       address,
       phone,
       email,
+      role,
+      companyName,
+      tin,
       password: hashedPassword,
-      profile: savedProfile?.secure_url,
-      role
-    };
-
-    // Create user
-    const user = await Users.create(newUserData);
+      profile: profileImage,
+    });
 
     return res.status(200).json({
       status: "200",
-      message: "Kwiyandsha byakunze",
+      message: "Kwiyandikisha byagenze neza",
       data: user,
     });
   } catch (err) {
-    console.error(err);
     return res.status(500).json({
       status: "500",
       message: "Habayemo ikibazo kidasanzwe",
@@ -84,6 +82,29 @@ export const login = async (req, res) => {
 
   try {
     const user = await userService.loginUser(value);
+    const token = generateToken(user._id);
+    res.status(200).json({
+      message: "Kwinjira byakunze",
+      data: user,
+      token,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "500",
+      message: "Habayemo ikibazo kidasanzwe",
+      error: error.message,
+    });
+  }
+};
+// Controller to login function by schools
+export const loginSchools = async (req, res) => {
+  const { error, value } = validateLoginUser(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
+  try {
+    const user = await userService.loginSchool(value);
     const token = generateToken(user._id);
     res.status(200).json({
       message: "Kwinjira byakunze",
