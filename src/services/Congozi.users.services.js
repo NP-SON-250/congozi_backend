@@ -2,6 +2,30 @@ import Users from "../models/Congozi.users.model";
 import bcrypt from "bcrypt";
 import { uploadToCloud } from "../helper/cloud";
 
+// Service to update a user
+export const updateUser = async (id, userData, file) => {
+  try {
+    const user = await Users.findById(id);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    // If a new profile image is provided, upload it
+    if (file) {
+      const result = await uploadToCloud(file);
+      userData.profile = result.secure_url;
+    }
+    if (userData.password) {
+      const saltRounds = 10;
+      userData.password = await bcrypt.hash(userData.password, saltRounds);
+    }
+    const updatedUser = await Users.findByIdAndUpdate(id, userData, {
+      new: true,
+    });
+    return updatedUser;
+  } catch (error) {
+    throw new Error(`Error updating user: ${error.message}`);
+  }
+};
 // Service to Login a user with tin or companyName
 export const loginSchool = async ({ identifier, password }) => {
   const user = await Users.findOne({
@@ -110,30 +134,7 @@ export const loginUser = async ({ identifier, password }) => {
   return user;
 };
 
-// Service to update a user
-export const updateUser = async (id, userData, file) => {
-  try {
-    const user = await Users.findById(id);
-    if (!user) {
-      throw new Error("User not found");
-    }
-    // If a new profile image is provided, upload it
-    if (file) {
-      const result = await uploadToCloud(file);
-      userData.profile = result.secure_url;
-    }
-    if (userData.password) {
-      const saltRounds = 10;
-      userData.password = await bcrypt.hash(userData.password, saltRounds);
-    }
-    const updatedUser = await Users.findByIdAndUpdate(id, userData, {
-      new: true,
-    });
-    return updatedUser;
-  } catch (error) {
-    throw new Error(`Error updating user: ${error.message}`);
-  }
-};
+
 // Service to delete a user
 export const deleteUser = async (id) => {
   try {

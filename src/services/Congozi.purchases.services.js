@@ -424,3 +424,41 @@ export const deleteUserPurchase = async (purchaseId) => {
     throw new Error("Failed to delete the purchase");
   }
 };
+
+// Service to delete a purchase by accessCode
+export const deleteUserPurchaseByAccessCode = async (accessCode) => {
+  try {
+    // Find the purchase using accessCode
+    const purchase = await Purchases.findOne({ accessCode });
+
+    if (!purchase) {
+      throw new Error("Purchase not found");
+    }
+
+    const itemId = purchase.itemId;
+
+    // Delete related exam/account records based on itemType
+    await UnpaidExams.deleteMany({ exam: itemId });
+    await WaittingExams.deleteMany({ exam: itemId });
+    await PassedExams.deleteMany({ exam: itemId });
+    await FailledExams.deleteMany({ exam: itemId });
+    await ExpiredExams.deleteMany({ exam: itemId });
+    await TotalUserExams.deleteMany({ exam: itemId });
+
+    await WaittingAccounts.deleteMany({ account: itemId });
+    await UnpaidAccounts.deleteMany({ account: itemId });
+    await TotalUserAccounts.deleteMany({ account: itemId });
+    await ExpiredAccounts.deleteMany({ account: itemId });
+
+    // Delete the purchase itself
+    await Purchases.deleteOne({ accessCode });
+
+    return {
+      message: "Purchase deleted successfully",
+      deletedPurchase: purchase,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to delete the purchase by accessCode");
+  }
+};

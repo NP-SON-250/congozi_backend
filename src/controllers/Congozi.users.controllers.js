@@ -8,6 +8,28 @@ import Users from "../models/Congozi.users.model";
 import bcrypt from "bcrypt";
 import { uploadToCloud } from "../helper/cloud";
 
+export const updateUser = async (req, res) => {
+  const { error, value } = validateUpdateUser(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
+  try {
+    const { id } = req.params;
+    const updatedUser = await userService.updateUser(id, value, req.file);
+
+    return res.status(200).json({
+      message: "User updated",
+      data: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "500",
+      message: "Habayemo ikibazo kidasanzwe",
+      error: error.message,
+    });
+  }
+};
 // create user controller
 export const createUsers = async (req, res, file) => {
   const {
@@ -156,28 +178,7 @@ export const loginSchools = async (req, res) => {
   }
 };
 
-export const updateUser = async (req, res) => {
-  const { error, value } = validateUpdateUser(req.body);
-  if (error) {
-    return res.status(400).json({ message: error.details[0].message });
-  }
 
-  try {
-    const { id } = req.params;
-    const updatedUser = await userService.updateUser(id, value, req.file);
-
-    return res.status(200).json({
-      message: "User updated",
-      data: updatedUser,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "500",
-      message: "Habayemo ikibazo kidasanzwe",
-      error: error.message,
-    });
-  }
-};
 
 export const deleteUser = async (req, res) => {
   try {

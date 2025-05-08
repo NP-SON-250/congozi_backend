@@ -10,6 +10,7 @@ import {
   examByCode,
   purchasedAndPaidItem,
   getUserPurchase,
+  deleteAccessCodePurchase,
 } from "../controllers/Congozi.purchases.controllers";
 import fileUpload from "../helper/multer";
 import { admins, students, schools, normal } from "../middleware/middleware";
@@ -43,5 +44,6 @@ purchaseRoute.put("/:id", fileUpload.single("status"), updatedPurchase);
 
 // DELETE route
 purchaseRoute.delete("/:purchaseId", normal, deleteLoggedInUserPurchase);
+purchaseRoute.delete("/access/:accessCode", deleteAccessCodePurchase);
 
 export default purchaseRoute;

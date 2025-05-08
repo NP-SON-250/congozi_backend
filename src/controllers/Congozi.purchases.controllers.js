@@ -238,3 +238,25 @@ export const deleteLoggedInUserPurchase = async (req, res) => {
     });
   }
 };
+
+// Delete purchase by accessCode
+export const deleteAccessCodePurchase = async (req, res) => {
+  try {
+    const { accessCode } = req.params;
+
+    const result = await purchaseServices.deleteUserPurchaseByAccessCode(accessCode);
+
+    return res.status(200).json({
+      status: "200",
+      message: "Purchase deleted",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "500",
+      message: "Purchase not found",
+      error: error.message,
+    });
+  }
+};

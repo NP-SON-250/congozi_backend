@@ -1374,6 +1374,37 @@ const options = {
         },
       },
     },
+    "/api/v1/purchases/access/{accessCode}": {
+      delete: {
+        tags: ["Purchases"],
+        summary: "Delete purchas by accessCode",
+        description: "Delete a purchas by accessCode",
+        parameters: [
+          {
+            name: "accessCode",
+            in: "path",
+            required: true,
+            schema: {
+              type: "string",
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Purchase deleted",
+          },
+          400: {
+            description: "Bad Request",
+          },
+          404: {
+            description: "Purchase not found",
+          },
+          500: {
+            description: "Internal Server Error",
+          },
+        },
+      },
+    },
 
     "/api/v1/purchases/user": {
       get: {
