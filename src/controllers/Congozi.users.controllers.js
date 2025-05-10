@@ -95,7 +95,10 @@ export const createUsers = async (req, res, file) => {
     }
     // Upload profile image if file is provided
     let savedProfile;
-    if (req.file) savedProfile = await uploadToCloud(req.file, res);
+    if (req.file) {
+      const uploadResult = await uploadToCloud(req.file, res);
+      savedProfile = uploadResult.secure_url;
+    }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -177,8 +180,6 @@ export const loginSchools = async (req, res) => {
     });
   }
 };
-
-
 
 export const deleteUser = async (req, res) => {
   try {
