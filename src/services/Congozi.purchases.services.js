@@ -11,31 +11,6 @@ import PassedExams from "../models/Congozi.passedexams.models";
 import FailledExams from "../models/Congozi.failedexams.models";
 import ExpiredExams from "../models/Congozi.expiredexams.models";
 import ExpiredAccounts from "../models/Congozi.expiredaccounts.models";
-
-// Service to get all pending purchases
-export const getCompletePurchases = async (userId) => {
-  try {
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-
-    const purchases = await Purchases.find({
-      purchasedBy: userId,
-      status: "complete",
-      $or: [
-        { endDate: { $gte: currentDate } },
-        { endDate: { $exists: false } },
-      ],
-    })
-      .populate("purchasedBy")
-      .populate("itemId")
-      .sort({ createdAt: -1 });
-
-    return purchases;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to retrieve user purchases");
-  }
-};
 //Code generator
 const generateAccessCode = () => {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -297,15 +272,7 @@ export const updatePurchase = async (id, purchaseData) => {
 // Service to get all purchases for admin
 export const getUsersPurchases = async (userId) => {
   try {
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-    const purchases = await Purchases.find({
-      purchasedBy: userId,
-      $or: [
-        { endDate: { $gte: currentDate } },
-        { endDate: { $exists: false } },
-      ],
-    })
+    const purchases = await Purchases.find({ purchasedBy: userId })
       .populate("purchasedBy")
       .populate("itemId")
       .sort({ createdAt: -1 });
@@ -319,14 +286,7 @@ export const getUsersPurchases = async (userId) => {
 // Service to get all purchases for admin
 export const getAdminPurchases = async () => {
   try {
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-    const purchases = await Purchases.find({
-      $or: [
-        { endDate: { $gte: currentDate } },
-        { endDate: { $exists: false } },
-      ],
-    })
+    const purchases = await Purchases.find()
       .populate("purchasedBy")
       .populate("itemId")
       .sort({ createdAt: -1 });
@@ -340,15 +300,26 @@ export const getAdminPurchases = async () => {
 
 export const getPendingPurchases = async (userId) => {
   try {
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
     const purchases = await Purchases.find({
       purchasedBy: userId,
       status: "pending",
-      $or: [
-        { endDate: { $gte: currentDate } },
-        { endDate: { $exists: false } },
-      ],
+    })
+      .populate("purchasedBy")
+      .populate("itemId")
+      .sort({ createdAt: -1 });
+
+    return purchases;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to retrieve user purchases");
+  }
+};
+// Service to get all pending purchases
+export const getCompletePurchases = async (userId) => {
+  try {
+    const purchases = await Purchases.find({
+      purchasedBy: userId,
+      status: "complete",
     })
       .populate("purchasedBy")
       .populate("itemId")
