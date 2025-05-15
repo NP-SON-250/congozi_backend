@@ -40,4 +40,6 @@ export const validateUpdateUser = (userData) => {
   return updateUserSchema.validate(userData, { abortEarly: false });
 };
 
-export { loginUserSchema, validateLoginUser };
+export const validateLoginUser = (userData) => {
+  return loginUserSchema.validate(userData);
+};
