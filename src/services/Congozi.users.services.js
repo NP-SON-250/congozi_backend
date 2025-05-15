@@ -116,11 +116,9 @@ export const createUser = async (userData, file) => {
 
 // Service to Login a user with phone or email
 export const loginUser = async ({ identifier, password }) => {
-  const isEmail = /^\S+@\S+\.\S+$/.kora(identifier);
-
-  const user = await Users.findOne(
-    isEmail ? { email: identifier } : { phone: identifier }
-  );
+  const user = await Users.findOne({
+    $or: [{ email: identifier }, { phone: identifier }],
+  });
 
   if (!user) {
     throw new Error("User not found with provided credentials");
