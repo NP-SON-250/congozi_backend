@@ -7,13 +7,13 @@ import PassedExams from "../models/Congozi.passedexams.models";
 import FailledExams from "../models/Congozi.failedexams.models";
 import ExpiredExams from "../models/Congozi.expiredexams.models";
 import TotalUserExams from "../models/Congozi.totaluserexams.models";
-// Service to get test exam wth number
+// Service to get kora exam wth number
 export const getExamByNumber = async (number) => {
   try {
-    const { type } = "Test" || "test";
+    const { type } = "kora" || "kora";
     const isExist = await Exams.findOne({
       number,
-      type: { $regex: /^test$/, $options: "i" },
+      type: { $regex: /^kora$/, $options: "i" },
     }).populate({
       path: "questions",
       populate: {

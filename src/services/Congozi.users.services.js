@@ -9,15 +9,34 @@ export const updateUser = async (id, userData, file) => {
     if (!user) {
       throw new Error("User not found");
     }
+
     // If a new profile image is provided, upload it
     if (file) {
       const result = await uploadToCloud(file);
       userData.profile = result.secure_url;
     }
+
+    // If password is being updated
     if (userData.password) {
+      // Check if currentPassword was provided
+      if (!userData.currentPassword) {
+        throw new Error("Current password is required to update password");
+      }
+
+      // Verify current password matches
+      const isMatch = await bcrypt.compare(userData.currentPassword, user.password);
+      if (!isMatch) {
+        throw new Error("Current password is incorrect");
+      }
+
+      // Hash and update the new password
       const saltRounds = 10;
       userData.password = await bcrypt.hash(userData.password, saltRounds);
+      
+      // Remove currentPassword from the update data
+      delete userData.currentPassword;
     }
+
     const updatedUser = await Users.findByIdAndUpdate(id, userData, {
       new: true,
     });
@@ -116,7 +135,7 @@ export const createUser = async (userData, file) => {
 
 // Service to Login a user with phone or email
 export const loginUser = async ({ identifier, password }) => {
-  const isEmail = /^\S+@\S+\.\S+$/.test(identifier);
+  const isEmail = /^\S+@\S+\.\S+$/.kora(identifier);
 
   const user = await Users.findOne(
     isEmail ? { email: identifier } : { phone: identifier }
@@ -133,7 +152,6 @@ export const loginUser = async ({ identifier, password }) => {
 
   return user;
 };
-
 
 // Service to delete a user
 export const deleteUser = async (id) => {

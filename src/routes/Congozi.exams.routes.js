@@ -5,7 +5,7 @@ import {
   getAllExams,
   getExamById,
   deleteExam,
-  getExamNumber
+  getExamNumber,
 } from "../controllers/Congozi.exams.controllers";
 import fileUpload from "../helper/multer";
 import { admins } from "../middleware/middleware";
@@ -16,6 +16,6 @@ examRoute.put("/:id", fileUpload.single("title"), updateExam);
 examRoute.delete("/:id", deleteExam);
 examRoute.get("/", getAllExams);
 examRoute.get("/:id", getExamById);
-examRoute.get("/test/:number", getExamNumber);
+examRoute.get("/kora/:number", getExamNumber);
 
 export default examRoute;

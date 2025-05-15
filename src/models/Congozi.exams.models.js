@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 const examsSchema = new mongoose.Schema({
   title: { type: String },
-  type:  {
+  type: {
     type: String,
-    enum: ["test", "learn"],
-    default: "learn",
+    enum: ["kora", "iga"],
+    default: "iga",
   },
   number: { type: String },
   fees: { type: String },

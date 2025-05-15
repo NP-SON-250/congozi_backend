@@ -497,11 +497,11 @@ const options = {
         },
       },
     },
-    "/api/v1/exams/test/{number}": {
+    "/api/v1/exams/kora/{number}": {
       get: {
         tags: ["Exams"],
-        summary: "Read test exam By number",
-        description: "Get test exam by number",
+        summary: "Read kora exam By number",
+        description: "Get kora exam by number",
         parameters: [
           {
             name: "number",
