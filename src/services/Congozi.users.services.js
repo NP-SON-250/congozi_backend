@@ -19,9 +19,6 @@ export const updateUser = async (id, userData, file) => {
     // If password is being updated
     if (userData.password) {
       // Check if currentPassword was provided
-      if (!userData.currentPassword) {
-        throw new Error("Current password is required to update password");
-      }
 
       // Verify current password matches
       const isMatch = await bcrypt.compare(userData.currentPassword, user.password);
