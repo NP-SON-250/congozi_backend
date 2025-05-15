@@ -16,7 +16,8 @@ const userRoute = express.Router();
 // Backend route (Node.js/Express example)
 userRoute.post('/verify-password', normal, async (req, res) => {
   try {
-    const user = await Users.findById(req.user._id);
+    const userId = req.loggedInUser.id;
+    const user = await Users.findById(userId);
     const isMatch = await bcrypt.compare(req.body.password, user.password);
     
     if (!isMatch) {
