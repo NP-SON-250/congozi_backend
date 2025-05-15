@@ -33,7 +33,7 @@ const updateUserSchema = Joi.object({
     .optional()
     .pattern(/^[0-9]{10,15}$/),
   role: Joi.string().valid("student", "admin", "school").optional(),
-}).with("password");
+});
 
 // Function to validate user update
 export const validateUpdateUser = (userData) => {
