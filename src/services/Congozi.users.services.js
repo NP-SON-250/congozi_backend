@@ -9,31 +9,15 @@ export const updateUser = async (id, userData, file) => {
     if (!user) {
       throw new Error("User not found");
     }
-
     // If a new profile image is provided, upload it
     if (file) {
       const result = await uploadToCloud(file);
       userData.profile = result.secure_url;
     }
-
-    // If password is being updated
     if (userData.password) {
-      // Check if currentPassword was provided
-
-      // Verify current password matches
-      const isMatch = await bcrypt.compare(userData.currentPassword, user.password);
-      if (!isMatch) {
-        throw new Error("Current password is incorrect");
-      }
-
-      // Hash and update the new password
       const saltRounds = 10;
       userData.password = await bcrypt.hash(userData.password, saltRounds);
-      
-      // Remove currentPassword from the update data
-      delete userData.currentPassword;
     }
-
     const updatedUser = await Users.findByIdAndUpdate(id, userData, {
       new: true,
     });
