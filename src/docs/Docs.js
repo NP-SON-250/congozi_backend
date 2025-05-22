@@ -1018,6 +1018,37 @@ const options = {
         },
       },
     },
+    "/api/v1/responses/supper{id}": {
+      delete: {
+        tags: ["Responses"],
+        summary: "Delete response",
+        description: "Delete an account",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: {
+              type: "string",
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Reponse deleted",
+          },
+          400: {
+            description: "Bad Request",
+          },
+          404: {
+            description: "Account not found",
+          },
+          500: {
+            description: "Internal Server Error",
+          },
+        },
+      },
+    },
     //Accounts actions
     "/api/v1/accounts/{id}": {
       get: {

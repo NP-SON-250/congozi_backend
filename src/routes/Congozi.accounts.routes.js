@@ -8,12 +8,12 @@ import {
 
  } from "../controllers/Congozi.accounts.controllers";
 import fileUpload from "../helper/multer";
-import { admins } from "../middleware/middleware";
+import { admins,supperAdmins } from "../middleware/middleware";
 
 const accountRoute = express.Router();
 accountRoute.post("/", fileUpload.single("title"), createAccount);
 accountRoute.put("/:id", fileUpload.single("title"), updateAccount);
-accountRoute.delete("/:id", deleteAccount);
+accountRoute.delete("/:id",supperAdmins, deleteAccount);
 accountRoute.get("/", getAllAccount);
 accountRoute.get("/:id", getAccountById);
 
