@@ -21,7 +21,7 @@ const updateUserSchema = Joi.object({
   idCard: Joi.string().optional().min(3).max(16),
   address: Joi.string().optional().min(3).max(30),
   phone: Joi.string().optional(),
-  role: Joi.string().valid("student", "admin", "school").optional(),
+  role: Joi.string().valid("student", "admin", "school","supperAdmin").optional(),
 });
 // Function to validate user update
 export const validateUpdateUser = (userData) => {
