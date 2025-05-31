@@ -99,6 +99,7 @@ export const makePaidPurchase = async (userId, userRole, itemId) => {
     if (itemType === "exams") {
       await TotalUserExams.create({
         exam: itemId,
+        accessCode:savedPurchase.accessCode,
         purchasedBy: userId,
       });
     } else if (itemType === "accounts") {
@@ -189,6 +190,7 @@ export const makePurchase = async (userId, userRole, itemId) => {
     if (itemType === "exams") {
       await TotalUserExams.create({
         exam: itemId,
+        accessCode:savedPurchase.accessCode,
         purchasedBy: userId,
       });
     } else if (itemType === "accounts") {
