@@ -11,7 +11,6 @@ import PassedExams from "../models/Congozi.passedexams.models";
 import FailledExams from "../models/Congozi.failedexams.models";
 import ExpiredExams from "../models/Congozi.expiredexams.models";
 import ExpiredAccounts from "../models/Congozi.expiredaccounts.models";
-import mongoose from 'mongoose';
 //Code generator
 const generateAccessCode = () => {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -432,57 +431,42 @@ export const deleteUserPurchase = async (purchaseId) => {
   }
 };
 
+// Service to delete a purchase by accessCode
 export const deleteUserPurchaseByAccessCode = async (accessCode) => {
-  let session = null;
   try {
-    // Start a transaction
-    session = await mongoose.startSession();
-    session.startTransaction();
-
-    // Find and delete the purchase in one operation
-    const purchase = await Purchases.findOneAndDelete(
-      { accessCode },
-      { session }
-    );
+    // Find the purchase using accessCode
+    const purchase = await Purchases.findOne({ accessCode });
 
     if (!purchase) {
-      throw new Error("Purchase not found for accessCode: " + accessCode);
+      throw new Error("Purchase not found");
     }
 
+    // Delete the purchase itself
+    const deletedPurchases = await Purchases.deleteOne({
+      accessCode: accessCode,
+    });
+
     const itemId = purchase.itemId;
-    const purchaseAccessCode = purchase.accessCode; // Renamed to avoid conflict
+    const purchaseAccessCode = purchase.accessCode;
+    // Delete related exam/account records based on itemType
+    await UnpaidExams.deleteMany({ exam: itemId });
+    await WaittingExams.deleteOne({ accessCode:purchaseAccessCode});
+    await PassedExams.deleteMany({ exam: itemId });
+    await FailledExams.deleteMany({ exam: itemId });
+    await ExpiredExams.deleteMany({ exam: itemId });
+    await TotalUserExams.deleteOne({ accessCode:purchaseAccessCode});
 
-    // Delete related records in parallel within the transaction
-    await Promise.all([
-      UnpaidExams.deleteMany({ exam: itemId }, { session }),
-      WaittingExams.deleteMany({ accessCode: purchaseAccessCode }, { session }),
-      PassedExams.deleteMany({ exam: itemId }, { session }),
-      FailledExams.deleteMany({ exam: itemId }, { session }),
-      ExpiredExams.deleteMany({ exam: itemId }, { session }),
-      TotalUserExams.deleteMany({ exam: itemId }, { session }),
-      WaittingAccounts.deleteMany({ account: itemId }, { session }),
-      UnpaidAccounts.deleteMany({ account: itemId }, { session }),
-      TotalUserAccounts.deleteMany({ account: itemId }, { session }),
-      ExpiredAccounts.deleteMany({ account: itemId }, { session })
-    ]);
-
-    await session.commitTransaction();
+    await WaittingAccounts.deleteMany({ account: itemId });
+    await UnpaidAccounts.deleteMany({ account: itemId });
+    await TotalUserAccounts.deleteMany({ account: itemId });
+    await ExpiredAccounts.deleteMany({ account: itemId });
 
     return {
-      message: "Purchase and all related records deleted successfully",
+      message: "Purchase deleted successfully",
       deletedPurchase: purchase,
     };
   } catch (error) {
-    if (session) {
-      await session.abortTransaction();
-    }
-    console.error("Error in deleteUserPurchaseByAccessCode:", error);
-    throw new Error(
-      `Failed to delete purchase: ${error.message || "Unknown error"}`
-    );
-  } finally {
-    if (session) {
-      session.endSession();
-    }
+    console.error(error);
+    throw new Error("Failed to delete the purchase by accessCode");
   }
 };
