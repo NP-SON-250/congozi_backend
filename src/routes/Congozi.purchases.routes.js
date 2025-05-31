@@ -23,7 +23,7 @@ purchaseRoute.get("/pending", normal, getUserPending);
 purchaseRoute.get("/complete", normal, getUserComplete);
 purchaseRoute.get("/user", normal, getUserPurchase);
 purchaseRoute.get("/:purchaseId", normal, getLoggedInUserSinglePurchase);
-purchaseRoute.get("/", normal, getUserAdmin);
+purchaseRoute.get("/", getUserAdmin);
 
 // POST routes
 purchaseRoute.post(

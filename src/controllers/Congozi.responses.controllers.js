@@ -58,8 +58,6 @@ export const addResponses = async (req, res) => {
 
     // 1. Delete from waiting model
     await WaittingExams.deleteOne({ exam: examId, purchasedBy: userId });
-
-    await Purchases.deleteOne({ itemId: examId, purchasedBy: userId });
     // 2. Insert into ExpiredExams
     await ExpiredExams.create({
       exam: examId,

@@ -85,6 +85,7 @@ export const makePaidPurchase = async (userId, userRole, itemId) => {
     if (itemType === "exams") {
       await WaittingExams.create({
         exam: itemId,
+        accessCode:savedPurchase.accessCode,
         purchasedBy: userId,
       });
     } else if (itemType === "accounts") {
@@ -252,6 +253,7 @@ export const updatePurchase = async (id, purchaseData) => {
       if (itemType === "exams") {
         await WaittingExams.create({
           exam: itemId,
+          accessCode:updatedPurchase.accessCode,
           purchasedBy: purchasedBy,
         });
         await UnpaidExams.deleteOne({ exam: itemId, purchasedBy });
@@ -332,10 +334,13 @@ export const getCompletePurchases = async (userId) => {
   }
 };
 //Get exam by access code
-export const getExamsByAccessCode = async (code,userId) => {
+export const getExamsByAccessCode = async (code, userId) => {
   try {
     // Correctly query by accessCode, not by _id
-    const exam = await Purchases.findOne({ accessCode: code,purchasedBy:userId })
+    const exam = await Purchases.findOne({
+      accessCode: code,
+      purchasedBy: userId,
+    })
       .populate("purchasedBy")
       .populate("itemId");
 
@@ -381,11 +386,12 @@ export const deleteUserPurchase = async (purchaseId) => {
     }
 
     const itemId = purchase.itemId;
+    const accessCode = purchase.accessCode;
     await UnpaidExams.deleteMany({
       exam: itemId,
     });
     await WaittingExams.deleteMany({
-      exam: itemId,
+      accessCode: accessCode,
     });
 
     await PassedExams.deleteMany({
@@ -435,11 +441,16 @@ export const deleteUserPurchaseByAccessCode = async (accessCode) => {
       throw new Error("Purchase not found");
     }
 
-    const itemId = purchase.itemId;
+    // Delete the purchase itself
+    const deletedPurchases = await Purchases.deleteOne({
+      accessCode: accessCode,
+    });
 
+    const itemId = purchase.itemId;
+    const accessCode = purchase.accessCode;
     // Delete related exam/account records based on itemType
     await UnpaidExams.deleteMany({ exam: itemId });
-    await WaittingExams.deleteMany({ exam: itemId });
+    await WaittingExams.deleteMany({ accessCode: accessCode });
     await PassedExams.deleteMany({ exam: itemId });
     await FailledExams.deleteMany({ exam: itemId });
     await ExpiredExams.deleteMany({ exam: itemId });
@@ -449,9 +460,6 @@ export const deleteUserPurchaseByAccessCode = async (accessCode) => {
     await UnpaidAccounts.deleteMany({ account: itemId });
     await TotalUserAccounts.deleteMany({ account: itemId });
     await ExpiredAccounts.deleteMany({ account: itemId });
-
-    // Delete the purchase itself
-    await Purchases.deleteOne({ accessCode });
 
     return {
       message: "Purchase deleted successfully",
