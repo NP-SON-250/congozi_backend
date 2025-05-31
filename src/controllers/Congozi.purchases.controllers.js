@@ -133,9 +133,9 @@ export const getUserComplete = async (req, res) => {
 export const examByCode = async (req, res) => {
   try {
     const { code } = req.params;
-
+    const userId = req.loggedInUser.id;
     // Retrieve the payment using the access code
-    const exams = await purchaseServices.getExamsByAccessCode(code);
+    const exams = await purchaseServices.getExamsByAccessCode(code,userId);
 
     return res.status(200).json({
       status: "200",

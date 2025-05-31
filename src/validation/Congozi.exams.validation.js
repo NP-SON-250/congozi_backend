@@ -5,7 +5,7 @@ const createExamSchema = Joi.object({
   number: Joi.string().required(),
   fees: Joi.string().required(),
   title: Joi.string().min(3).max(30).required(),
-  type: Joi.string().required().min(3).max(30).required(),
+  type: Joi.string().valid("kora", "iga").required().min(3).max(30),
 });
 // Function to validate exam creation
 export const validateCreateExam = (examData) => {
@@ -14,7 +14,7 @@ export const validateCreateExam = (examData) => {
 // Validation schema for exam update
 const updateExamSchema = Joi.object({
     title: Joi.string().min(3).max(30).optional(),
-    type: Joi.string().min(3).max(30).optional(),
+    type: Joi.string().min(3).max(30).valid("kora", "iga").optional(),
     number: Joi.string().optional(),
     fees: Joi.string().optional(),
 });

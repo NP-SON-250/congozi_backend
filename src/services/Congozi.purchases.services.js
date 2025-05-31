@@ -332,10 +332,10 @@ export const getCompletePurchases = async (userId) => {
   }
 };
 //Get exam by access code
-export const getExamsByAccessCode = async (code) => {
+export const getExamsByAccessCode = async (code,userId) => {
   try {
     // Correctly query by accessCode, not by _id
-    const exam = await Purchases.findOne({ accessCode: code })
+    const exam = await Purchases.findOne({ accessCode: code,purchasedBy:userId })
       .populate("purchasedBy")
       .populate("itemId");
 
