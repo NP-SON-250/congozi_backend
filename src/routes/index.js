@@ -20,8 +20,6 @@ import responsesRoute from "./Congozi.responses.routes";
 import iremboRoute from "./Congozi.irembo.routes";
 const router = express.Router();
 
-// Route
-
 router.use("/docs", docrouter);
 router.use("/users", userRoute);
 router.use("/exams", examRoute);
@@ -42,16 +40,5 @@ router.use("/waittingaccounts", waittingAccountRoute);
 router.use("/expiredaccounts", expiredAccountRoute);
 router.use("/responses", responsesRoute);
 router.use("/irembo", iremboRoute);
-
-
-
-
-
-
-
-
-
-
-
 
 export default router;

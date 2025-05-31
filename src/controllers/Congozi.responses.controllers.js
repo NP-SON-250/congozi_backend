@@ -2,11 +2,9 @@ import responsesModel from "../models/Congozi.responses.models";
 import Exams from "../models/Congozi.exams.models";
 import Questions from "../models/Congozi.questions.models";
 import Options from "../models/Congozi.options.models";
-import WaittingExams from "../models/Congozi.waittingexams.models";
 import ExpiredExams from "../models/Congozi.expiredexams.models";
 import PassedExams from "../models/Congozi.passedexams.models";
 import FailledExams from "../models/Congozi.failedexams.models";
-import Purchases from "../models/Congozi.purchases.models";
 
 export const addResponses = async (req, res) => {
   try {
@@ -20,8 +18,6 @@ export const addResponses = async (req, res) => {
         message: "Exam not found",
       });
     }
-
-    // Check if user has responded the same exam and remove record
     const findrespondedRecord = await responsesModel.findOne({
       examId: examId,
       userId: userId,
@@ -31,8 +27,6 @@ export const addResponses = async (req, res) => {
     }
 
     let correctOptionIds = [];
-
-    // Iterate through each response
     for (const response of responses) {
       const { questionId } = response;
 
@@ -45,21 +39,16 @@ export const addResponses = async (req, res) => {
         correctOptionIds.push(correctOption._id);
       }
     }
-
-    // Create the response document
     const savedResponse = await responsesModel.create({
       examId: examId,
       userId: userId,
       correctOptionId: correctOptionIds,
       responses,
     });
-    // 2. Insert into ExpiredExams
     await ExpiredExams.create({
       exam: examId,
       purchasedBy: userId,
     });
-
-    // 3. Calculate total points
     let totalPoints = 0;
     for (const response of responses) {
       const selectedOption = await Options.findById(response.selectedOptionId);
@@ -67,8 +56,6 @@ export const addResponses = async (req, res) => {
         totalPoints += 1;
       }
     }
-
-    // 4. Insert into PassedExams or FailledExams
     if (totalPoints >= 12) {
       await PassedExams.create({
         exam: examId,
@@ -140,7 +127,6 @@ export const getUserResponses = async (req, res) => {
             };
           })
         );
-
         return {
           ...exam,
           totalPoints,
@@ -150,7 +136,6 @@ export const getUserResponses = async (req, res) => {
         };
       })
     );
-
     return res.status(200).json({
       status: "200",
       message: "Your responses",

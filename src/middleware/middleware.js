@@ -1,7 +1,6 @@
 import Jwt from "jsonwebtoken";
 import Users from "../models/Congozi.users.model";
 
-//students
 export const students = async (req, res, next) => {
   try {
     let token;
@@ -41,7 +40,7 @@ export const students = async (req, res, next) => {
     });
   }
 };
-//Schools
+
 export const schools = async (req, res, next) => {
   try {
     let token;
@@ -82,7 +81,6 @@ export const schools = async (req, res, next) => {
   }
 };
 
-//admin
 export const admins = async (req, res, next) => {
   try {
     let token;
@@ -122,7 +120,7 @@ export const admins = async (req, res, next) => {
     });
   }
 };
-//admin
+
 export const supperAdmins = async (req, res, next) => {
   try {
     let token;
@@ -162,7 +160,7 @@ export const supperAdmins = async (req, res, next) => {
     });
   }
 };
-// Normal
+
 export const normal = async (req, res, next) => {
   try {
     let token;

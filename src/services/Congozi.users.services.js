@@ -9,7 +9,6 @@ export const updateUser = async (id, userData, file) => {
     if (!user) {
       throw new Error("User not found");
     }
-    // If a new profile image is provided, upload it
     if (file) {
       const result = await uploadToCloud(file);
       userData.profile = result.secure_url;

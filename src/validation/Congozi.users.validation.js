@@ -1,6 +1,5 @@
 import Joi from "joi";
 
-// Validation schema for user login
 const loginUserSchema = Joi.object({
   identifier: Joi.string().required(),
   password: Joi.string().required(),
@@ -9,7 +8,6 @@ const loginUserSchema = Joi.object({
 export const validateLoginUser = (userData) => {
   return loginUserSchema.validate(userData);
 };
-// Validation schema for user update
 const updateUserSchema = Joi.object({
   companyName: Joi.string().optional(),
   tin: Joi.string().optional(),
@@ -23,7 +21,6 @@ const updateUserSchema = Joi.object({
   phone: Joi.string().optional(),
   role: Joi.string().valid("student", "admin", "school","supperAdmin").optional(),
 });
-// Function to validate user update
 export const validateUpdateUser = (userData) => {
   return updateUserSchema.validate(userData);
 };

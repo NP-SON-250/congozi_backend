@@ -11,7 +11,7 @@ import PassedExams from "../models/Congozi.passedexams.models";
 import FailledExams from "../models/Congozi.failedexams.models";
 import ExpiredExams from "../models/Congozi.expiredexams.models";
 import ExpiredAccounts from "../models/Congozi.expiredaccounts.models";
-//Code generator
+
 const generateAccessCode = () => {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const alphanum = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -24,7 +24,7 @@ const generateAccessCode = () => {
 
   return code;
 };
-// Make purchase no payment
+
 export const makePaidPurchase = async (userId, userRole, itemId) => {
   try {
     let itemType = null;
@@ -45,8 +45,6 @@ export const makePaidPurchase = async (userId, userRole, itemId) => {
     if (!itemType || !item) {
       throw new Error("Item not found in exams or accounts.");
     }
-
-    // Restrict based on role
     if (userRole === "student" && itemType !== "exams") {
       throw new Error("Students are only allowed to purchase exams.");
     }
@@ -54,15 +52,12 @@ export const makePaidPurchase = async (userId, userRole, itemId) => {
     if (userRole === "school" && itemType !== "accounts") {
       throw new Error("Schools are only allowed to purchase accounts.");
     }
-
-    // If accounts, determine endDate from validity (e.g., "30d")
     let endDate = null;
     if (itemType === "accounts") {
       const days = parseInt(item.validIn.replace(/\D/g, ""));
       endDate = new Date();
       endDate.setDate(endDate.getDate() + days);
     }
-    // Save purchase
     const savedPurchase = await Purchases.create({
       itemType,
       itemId,
@@ -73,15 +68,12 @@ export const makePaidPurchase = async (userId, userRole, itemId) => {
       endDate,
       status: "complete",
     });
-    //Find saved purchase item
     let items = null;
     if (savedPurchase.itemType === "exams") {
       items = await Exams.findById(savedPurchase.itemId);
     } else if (savedPurchase.itemType === "accounts") {
       items = await Accounts.findById(savedPurchase.itemId);
     }
-
-    // Save in unpaid exams /accounts
     if (itemType === "exams") {
       await WaittingExams.create({
         exam: itemId,
@@ -94,8 +86,6 @@ export const makePaidPurchase = async (userId, userRole, itemId) => {
         purchasedBy: userId,
       });
     }
-
-    // Save in total exams / accounts
     if (itemType === "exams") {
       await TotalUserExams.create({
         exam: itemId,
@@ -118,7 +108,6 @@ export const makePaidPurchase = async (userId, userRole, itemId) => {
     throw new Error(`Error making purchase: ${error.message}`);
   }
 };
-// Make purchase no payment
 export const makePurchase = async (userId, userRole, itemId) => {
   try {
     let itemType = null;
@@ -139,8 +128,6 @@ export const makePurchase = async (userId, userRole, itemId) => {
     if (!itemType || !item) {
       throw new Error("Item not found in exams or accounts.");
     }
-
-    // Restrict based on role
     if (userRole === "student" && itemType !== "exams") {
       throw new Error("Students are only allowed to purchase exams.");
     }
@@ -148,8 +135,6 @@ export const makePurchase = async (userId, userRole, itemId) => {
     if (userRole === "school" && itemType !== "accounts") {
       throw new Error("Schools are only allowed to purchase accounts.");
     }
-
-    // Save purchase
     const savedPurchase = await Purchases.create({
       itemType,
       itemId,
@@ -159,21 +144,18 @@ export const makePurchase = async (userId, userRole, itemId) => {
       startDate: null,
       endDate: null,
     });
-    //Find saved purchase item to have its fees
     let items = null;
     if (savedPurchase.itemType === "exams") {
       items = await Exams.findById(savedPurchase.itemId);
     } else if (savedPurchase.itemType === "accounts") {
       items = await Accounts.findById(savedPurchase.itemId);
     }
-    // If accounts, determine endDate from validity (e.g., "30d")
     let endDate = null;
     if (savedPurchase.itemType === "accounts" && savedPurchase.validIn) {
       const days = parseInt(item.validIn.replace(/\D/g, ""));
       endDate = new Date();
       endDate.setDate(endDate.getDate() + days);
     }
-    // Save in unpaid exams /accounts
     if (itemType === "exams") {
       await UnpaidExams.create({
         exam: itemId,
@@ -185,8 +167,6 @@ export const makePurchase = async (userId, userRole, itemId) => {
         purchasedBy: userId,
       });
     }
-
-    // Save in total exams / accounts
     if (itemType === "exams") {
       await TotalUserExams.create({
         exam: itemId,
@@ -209,8 +189,6 @@ export const makePurchase = async (userId, userRole, itemId) => {
     throw new Error(`Error making purchase: ${error.message}`);
   }
 };
-
-// Service to update a purchase
 export const updatePurchase = async (id, purchaseData) => {
   const { status } = purchaseData;
 
@@ -219,13 +197,9 @@ export const updatePurchase = async (id, purchaseData) => {
     if (!purchaseExist) {
       throw new Error("Payment not found");
     }
-
-    // Only process dates if marking as complete
     if (status === "complete") {
       const startDate = new Date();
       let endDate = null;
-
-      // If account, calculate endDate from validIn
       if (purchaseExist.itemType === "accounts") {
         const accountItem = await Accounts.findById(purchaseExist.itemId);
         if (accountItem && accountItem.validIn) {
@@ -234,8 +208,6 @@ export const updatePurchase = async (id, purchaseData) => {
           endDate.setDate(startDate.getDate() + days);
         }
       }
-
-      // Add startDate and endDate to the update payload
       purchaseData.startDate = startDate;
       purchaseData.endDate = endDate;
     }
@@ -247,8 +219,6 @@ export const updatePurchase = async (id, purchaseData) => {
         new: true,
       }
     );
-
-    // Move to waiting + cleanup unpaid
     if (updatedPurchase.status === "complete") {
       const { itemId, itemType, purchasedBy } = updatedPurchase;
 
@@ -273,7 +243,6 @@ export const updatePurchase = async (id, purchaseData) => {
     throw new Error(`Error updating purchase: ${error.message}`);
   }
 };
-// Service to get all purchases for admin
 export const getUsersPurchases = async (userId) => {
   try {
     const purchases = await Purchases.find({ purchasedBy: userId })
@@ -287,7 +256,6 @@ export const getUsersPurchases = async (userId) => {
     throw new Error("Failed to retrieve user purchases");
   }
 };
-// Service to get all purchases for admin
 export const getAdminPurchases = async () => {
   try {
     const purchases = await Purchases.find()
@@ -318,7 +286,6 @@ export const getPendingPurchases = async (userId) => {
     throw new Error("Failed to retrieve user purchases");
   }
 };
-// Service to get all pending purchases
 export const getCompletePurchases = async (userId) => {
   try {
     const purchases = await Purchases.find({
@@ -335,10 +302,8 @@ export const getCompletePurchases = async (userId) => {
     throw new Error("Failed to retrieve user purchases");
   }
 };
-//Get exam by access code
 export const getExamsByAccessCode = async (code, userId) => {
   try {
-    // Correctly query by accessCode, not by _id
     const exam = await Purchases.findOne({
       accessCode: code,
       purchasedBy: userId,
@@ -356,7 +321,7 @@ export const getExamsByAccessCode = async (code, userId) => {
     throw new Error("Failed to retrieve the exams by access code");
   }
 };
-// Service to get a single purchase for the logged-in user
+
 export const getSingleUserPurchase = async (userId, purchaseId) => {
   try {
     const purchase = await Purchases.findOne({
@@ -377,10 +342,8 @@ export const getSingleUserPurchase = async (userId, purchaseId) => {
   }
 };
 
-// Service to delete a purchase for the logged-in user
 export const deleteUserPurchase = async (purchaseId) => {
   try {
-    // Find the purchase that belongs to the logged-in user
     const purchase = await Purchases.findById(purchaseId);
 
     if (!purchase) {
@@ -419,7 +382,6 @@ export const deleteUserPurchase = async (purchaseId) => {
     await ExpiredAccounts.deleteMany({
       account: itemId,
     });
-    // Delete the purchase
     await Purchases.findByIdAndDelete(purchaseId);
 
     return {
@@ -431,22 +393,17 @@ export const deleteUserPurchase = async (purchaseId) => {
     throw new Error("Failed to delete the purchase");
   }
 };
-// Service to delete a purchase by accessCode
 export const deleteUserPurchaseByAccessCode = async (accessCode) => {
   try {
-    // Find the purchase using accessCode
     const purchase = await Purchases.findOne({ accessCode });
 
     if (!purchase) {
       throw new Error("Purchase not found");
     }
-
-    // Delete the purchase itself
     const deletedPurchases = await Purchases.deleteOne({
       accessCode: accessCode,
     });
     const purchaseAccessCode = purchase.accessCode;
-    // Delete related exam records
     await WaittingExams.deleteOne({ accessCode:purchaseAccessCode});
     await TotalUserExams.deleteOne({ accessCode:purchaseAccessCode});
 

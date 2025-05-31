@@ -30,7 +30,6 @@ export const updateUser = async (req, res) => {
     });
   }
 };
-// create user controller
 export const createUsers = async (req, res, file) => {
   const {
     fName,
@@ -45,7 +44,6 @@ export const createUsers = async (req, res, file) => {
     tin,
   } = req.body;
   try {
-    // Check if user already exists by email, ID card, tin, companyName, or phone
     if (email) {
       const emailExist = await Users.findOne({ email: email });
       if (emailExist) {
@@ -93,17 +91,12 @@ export const createUsers = async (req, res, file) => {
         });
       }
     }
-    // Upload profile image if file is provided
     let savedProfile;
     if (req.file) {
       const uploadResult = await uploadToCloud(req.file, res);
       savedProfile = uploadResult.secure_url;
     }
-
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Prepare user object
     const newUserData = {
       fName,
       lName,
@@ -116,8 +109,6 @@ export const createUsers = async (req, res, file) => {
       password: hashedPassword,
       profile: savedProfile,
     };
-
-    // Create user
     const user = await Users.create(newUserData);
 
     return res.status(200).json({
@@ -134,7 +125,6 @@ export const createUsers = async (req, res, file) => {
     });
   }
 };
-// Controller to login function
 export const login = async (req, res) => {
   const { error, value } = validateLoginUser(req.body);
   if (error) {
@@ -157,7 +147,6 @@ export const login = async (req, res) => {
     });
   }
 };
-// Controller to login function by schools
 export const loginSchools = async (req, res) => {
   const { error, value } = validateLoginUser(req.body);
   if (error) {

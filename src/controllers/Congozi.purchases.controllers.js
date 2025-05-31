@@ -109,7 +109,7 @@ export const getUserPending = async (req, res) => {
     });
   }
 };
-//Complete
+
 export const getUserComplete = async (req, res) => {
   try {
     const userId = req.loggedInUser.id;
@@ -129,12 +129,11 @@ export const getUserComplete = async (req, res) => {
     });
   }
 };
-//Purchased exam by code
+
 export const examByCode = async (req, res) => {
   try {
     const { code } = req.params;
     const userId = req.loggedInUser.id;
-    // Retrieve the payment using the access code
     const exams = await purchaseServices.getExamsByAccessCode(code,userId);
 
     return res.status(200).json({
@@ -151,7 +150,7 @@ export const examByCode = async (req, res) => {
     });
   }
 };
-//Admin
+
 export const getUserAdmin = async (req, res) => {
   try {
     const purchases = await purchaseServices.getAdminPurchases();
@@ -170,8 +169,7 @@ export const getUserAdmin = async (req, res) => {
     });
   }
 };
-//Logged user
-//Admin
+
 export const getUserPurchase = async (req, res) => {
   try {
     const userId = req.loggedInUser.id;
@@ -238,7 +236,6 @@ export const deleteLoggedInUserPurchase = async (req, res) => {
   }
 };
 
-// Delete purchase by accessCode
 export const deleteAccessCodePurchase = async (req, res) => {
   try {
     const { accessCode } = req.params;

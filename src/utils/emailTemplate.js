@@ -3,11 +3,11 @@ import sendMail from "../helper/sendMail";
 export const sendEmailToAdmin = (email, name) => {
   const emailTemplate = {
     emailTo: email,
-    subject: "Welcome to Hover Ai - Exciting Times Ahead!",
+    subject: "Welcome to Technical expert unity - Exciting Times Ahead!",
     message: `<h1>Dear Admin, ${name}</h1><br/>
-    Thank you for joining us at Hover Ai! We're eager to embark on this journey together, bringing you the lakora and greakora. Stay tuned for more updates and opportunities to come.<br/>
+    Thank you for joining us at Technical expert unity ! We're eager to embark on this journey together. Stay tuned for more updates and opportunities.<br/>
     Warm regards,<br/>
-    The Hover Ai Team<br/>`,
+    The Technical expert unity Team<br/>`,
   };
 
   sendMail(emailTemplate);
@@ -26,7 +26,7 @@ export const sendResetEmail = (email, name, link, resetCode) => {
         </a><br><br>
         Reset password code is only valid for <b>15 minutes</b>.
         <br/><br/>
-        The Hover Ai Team<br/>`,
+        The Technical expert unity Team<br/>`,
   };
 
   sendMail(emailTemplate);

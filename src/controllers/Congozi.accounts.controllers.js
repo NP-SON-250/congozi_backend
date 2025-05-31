@@ -3,8 +3,6 @@ import {
     validateCreateAccount,
     validateUpdateAccount
  } from "../validation/Congozi.accounts.validation";
-
-// create account controller
 export const createAccount = async (req, res) => {
   const { error, value } = validateCreateAccount(req.body);
   if (error) {
