@@ -53,11 +53,6 @@ export const addResponses = async (req, res) => {
       correctOptionId: correctOptionIds,
       responses,
     });
-
-    // ===== Now handle waiting, expired, passed/failed =====
-
-    // 1. Delete from waiting model
-    await WaittingExams.deleteOne({ exam: examId, purchasedBy: userId });
     // 2. Insert into ExpiredExams
     await ExpiredExams.create({
       exam: examId,
