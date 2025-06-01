@@ -17,7 +17,6 @@ import expiredAccountRoute from "./Congozi.expiredaccounts.routes";
 import waittingAccountRoute from "./Congozi.waittingaccounts.routes";
 import waittingExamRoute from "./Congozi.waittingexams.routes";
 import responsesRoute from "./Congozi.responses.routes";
-import iremboRoute from "./Congozi.irembo.routes";
 const router = express.Router();
 
 router.use("/docs", docrouter);
@@ -39,6 +38,5 @@ router.use("/waittingexams", waittingExamRoute);
 router.use("/waittingaccounts", waittingAccountRoute);
 router.use("/expiredaccounts", expiredAccountRoute);
 router.use("/responses", responsesRoute);
-router.use("/irembo", iremboRoute);
 
 export default router;

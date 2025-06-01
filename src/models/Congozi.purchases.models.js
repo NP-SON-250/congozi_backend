@@ -9,6 +9,7 @@ const purchasesSchema = new mongoose.Schema({
   purchasedBy: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
   amount: { type: String },
   accessCode: { type: String },
+  invoiceNumber:{type:String},
   startDate: { type: Date },
   endDate: { type: Date },
   createdAt: { type: Date, default: Date.now },

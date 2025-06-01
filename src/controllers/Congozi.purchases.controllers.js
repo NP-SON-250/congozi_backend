@@ -3,7 +3,8 @@ import {
   validateCreatePurchase,
   validateUpdatePurchase,
 } from "../validation/Congozi.purchases.validation";
-
+import { createInvoice } from "../services/Congozi.irembo.services";
+import Purchases from "../models/Congozi.purchases.models";
 export const purchasedItem = async (req, res) => {
   const { error, value } = validateCreatePurchase(req.body);
   if (error) {
@@ -15,13 +16,48 @@ export const purchasedItem = async (req, res) => {
     const userRole = req.loggedInUser.role;
     const { itemId } = req.params;
 
+    const PROD_EXAM = process.env.Prod_exam;
+    const PROD_ACCOUNT = process.env.Prod_exam;
     const result = await purchaseServices.makePurchase(
       userId,
       userRole,
       itemId,
       value
     );
-
+    if (result.purchase.itemType === "exams") {
+      const invoice = await createInvoice(req, res, {
+        itemAmount: result.purchase.amount,
+        itemCode: PROD_EXAM,
+        expiresAt: null,
+        transacCode: result.purchase.accessCode,
+        descriptions: `Invoice on payment for ${result.purchase.itemType} was created.`,
+      });
+      if (invoice) {
+        const updatedPurchase = await Purchases.findByIdAndUpdate(
+          result.purchase._id,
+          {
+            invoiceNumber: invoice.data.invoiceNumber,
+          }
+        );
+      }
+    }
+    if (result.purchase.itemType === "accounts") {
+      const invoice = await createInvoice(req, res, {
+        itemAmount: result.purchase.amount,
+        itemCode: PROD_ACCOUNT,
+        expiresAt: result.purchase.endDate,
+        transacCode: result.purchase.accessCode,
+        descriptions: `Invoice on payment for ${result.purchase.itemType} was created.`,
+      });
+      if (invoice) {
+        const updatedPurchase = await Purchases.findByIdAndUpdate(
+          result.purchase._id,
+          {
+            invoiceNumber: invoice.data.invoiceNumber,
+          },
+        );
+      }
+    }
     return res.status(201).json({
       status: "201",
       message: "Purchase created",
@@ -47,6 +83,9 @@ export const purchasedAndPaidItem = async (req, res) => {
     const userRole = req.loggedInUser.role;
     const { itemId } = req.params;
 
+    const PROD_EXAM = process.env.Prod_exam;
+    const PROD_ACCOUNT = process.env.Prod_exam;
+
     const result = await purchaseServices.makePaidPurchase(
       userId,
       userRole,
@@ -54,6 +93,40 @@ export const purchasedAndPaidItem = async (req, res) => {
       value
     );
 
+    if (result.purchase.itemType === "exams") {
+      const invoice = await createInvoice(req, res, {
+        itemAmount: result.purchase.amount,
+        itemCode: PROD_EXAM,
+        expiresAt: null,
+        transacCode: result.purchase.accessCode,
+        descriptions: `Invoice on payment for ${result.purchase.itemType} was created.`,
+      });
+      if (invoice) {
+        const updatedPurchase = await Purchases.findByIdAndUpdate(
+          result.purchase._id,
+          {
+            invoiceNumber: invoice.data.invoiceNumber,
+          }
+        );
+      }
+    }
+    if (result.purchase.itemType === "accounts") {
+      const invoice = await createInvoice(req, res, {
+        itemAmount: result.purchase.amount,
+        itemCode: PROD_ACCOUNT,
+        expiresAt: result.purchase.endDate,
+        transacCode: result.purchase.accessCode,
+        descriptions: `Invoice on payment for ${result.purchase.itemType} was created.`,
+      });
+      if (invoice) {
+        const updatedPurchase = await Purchases.findByIdAndUpdate(
+          result.purchase._id,
+          {
+            invoiceNumber: invoice.data.invoiceNumber,
+          },
+        );
+      }
+    }
     return res.status(201).json({
       status: "201",
       message: "Purchase and paid success",
@@ -134,7 +207,7 @@ export const examByCode = async (req, res) => {
   try {
     const { code } = req.params;
     const userId = req.loggedInUser.id;
-    const exams = await purchaseServices.getExamsByAccessCode(code,userId);
+    const exams = await purchaseServices.getExamsByAccessCode(code, userId);
 
     return res.status(200).json({
       status: "200",
@@ -240,7 +313,9 @@ export const deleteAccessCodePurchase = async (req, res) => {
   try {
     const { accessCode } = req.params;
 
-    const result = await purchaseServices.deleteUserPurchaseByAccessCode(accessCode);
+    const result = await purchaseServices.deleteUserPurchaseByAccessCode(
+      accessCode
+    );
 
     return res.status(200).json({
       status: "200",
