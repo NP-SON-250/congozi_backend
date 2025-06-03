@@ -147,7 +147,6 @@ export const makePaidPurchase = async (userId, userRole, itemId) => {
       accessCode: generateAccessCode(),
       startDate: new Date(),
       endDate,
-      status: "complete",
     });
     let items = null;
     if (savedPurchase.itemType === "exams") {
