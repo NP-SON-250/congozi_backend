@@ -85,7 +85,7 @@ export const purchasedAndPaidItem = async (req, res) => {
 
     const PROD_EXAM = process.env.Prod_exam;
     const PROD_ACCOUNT = process.env.Prod_exam;
-
+//
     const result = await purchaseServices.makePaidPurchase(
       userId,
       userRole,
