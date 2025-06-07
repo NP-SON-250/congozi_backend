@@ -3,8 +3,8 @@ const examsSchema = new mongoose.Schema({
   title: { type: String },
   type: {
     type: String,
-    enum: ["kora", "iga"],
-    default: "iga",
+    enum: ["gukora", "kwiga"],
+    default: "kwiga",
   },
   number: { type: String },
   fees: { type: String },
