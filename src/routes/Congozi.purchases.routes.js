@@ -13,7 +13,7 @@ import {
   deleteAccessCodePurchase,
 } from "../controllers/Congozi.purchases.controllers";
 import fileUpload from "../helper/multer";
-import { admins, students, schools, normal, supperAdmins } from "../middleware/middleware";
+import { normal, supperAdmins } from "../middleware/middleware";
 
 const purchaseRoute = express.Router();
 

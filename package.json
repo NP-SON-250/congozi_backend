@@ -1,5 +1,5 @@
 {
-  "name": "congozi_backend",
+  "name": "Congozi_backend",
   "version": "1.0.0",
   "description": "Congozi Backend system",
   "main": "index.js",
@@ -11,8 +11,7 @@
     "build": "npm run build-babel"
   },
   "repository": {
-    "type": "git",
-    "url": "git remote add origin https://github.com/NP-SON-250/congozi_backend.git"
+    "type": "git"
   },
   "author": "Congozi Expert",
   "license": "ISC",

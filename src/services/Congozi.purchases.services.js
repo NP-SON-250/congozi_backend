@@ -11,6 +11,7 @@ import PassedExams from "../models/Congozi.passedexams.models";
 import FailledExams from "../models/Congozi.failedexams.models";
 import ExpiredExams from "../models/Congozi.expiredexams.models";
 import ExpiredAccounts from "../models/Congozi.expiredaccounts.models";
+import Notify from "../models/Congozi.notifies.models";
 const generateAccessCode = () => {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const alphanum = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -20,7 +21,7 @@ const generateAccessCode = () => {
   for (let i = 0; i < 11; i++) {
     code += alphanum[Math.floor(Math.random() * alphanum.length)];
   }
-  
+
   return code;
 };
 
@@ -235,183 +236,24 @@ export const updatePurchase = async (id, purchaseData) => {
         });
         await UnpaidAccounts.deleteOne({ account: itemId, purchasedBy });
       }
+      const note = await Notify.findOne({ purchasedItem: id });
+      if (note) {
+        const updatedMessage = `Dear 
+        ${note.ownerName}, Ubusabe bwawe bwo guhabwa uburenganzira kuri 
+        ${updatedPurchase.itemType} wishyuye 
+        ${updatedPurchase.amount} bwamaje kwemezwa. Code yokwifashisha ureba ${updatedPurchase.itemType} zawe ni ${updatedPurchase.accessCode}. Murakoze!!! `;
+        await Notify.findOneAndUpdate(
+          { purchasedItem: id },
+          {
+            status: "Access Granted",
+            message: updatedMessage,
+          }
+        );
+      }
     }
 
     return updatedPurchase;
   } catch (error) {
     throw new Error(`Error updating purchase: ${error.message}`);
-  }
-};
-export const getUsersPurchases = async (userId) => {
-  try {
-    const purchases = await Purchases.find({ purchasedBy: userId })
-      .populate("purchasedBy")
-      .populate("itemId")
-      .sort({ createdAt: -1 });
-
-    return purchases;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to retrieve user purchases");
-  }
-};
-export const getAdminPurchases = async () => {
-  try {
-    const purchases = await Purchases.find()
-      .populate("purchasedBy")
-      .populate("itemId")
-      .sort({ createdAt: -1 });
-
-    return purchases;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to retrieve user purchases");
-  }
-};
-
-export const getPendingPurchases = async (userId) => {
-  try {
-    const purchases = await Purchases.find({
-      purchasedBy: userId,
-      status: "pending",
-    })
-      .populate("purchasedBy")
-      .populate("itemId")
-      .sort({ createdAt: -1 });
-
-    return purchases;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to retrieve user purchases");
-  }
-};
-export const getCompletePurchases = async (userId) => {
-  try {
-    const purchases = await Purchases.find({
-      purchasedBy: userId,
-      status: "complete",
-    })
-      .populate("purchasedBy")
-      .populate("itemId")
-      .sort({ createdAt: -1 });
-
-    return purchases;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to retrieve user purchases");
-  }
-};
-export const getExamsByAccessCode = async (code, userId) => {
-  try {
-    const exam = await Purchases.findOne({
-      accessCode: code,
-      purchasedBy: userId,
-    })
-      .populate("purchasedBy")
-      .populate("itemId");
-
-    if (!exam) {
-      throw new Error("No exam not found with this access code.");
-    }
-
-    return exam;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to retrieve the exams by access code");
-  }
-};
-
-export const getSingleUserPurchase = async (userId, purchaseId) => {
-  try {
-    const purchase = await Purchases.findOne({
-      _id: purchaseId,
-      purchasedBy: userId,
-    }).populate({
-      path: "itemId",
-    });
-
-    if (!purchase) {
-      throw new Error("Purchase not found or unauthorized access");
-    }
-
-    return purchase;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to retrieve the purchase");
-  }
-};
-
-export const deleteUserPurchase = async (purchaseId) => {
-  try {
-    const purchase = await Purchases.findById(purchaseId);
-
-    if (!purchase) {
-      throw new Error("Purchase not found");
-    }
-
-    const itemId = purchase.itemId;
-    await UnpaidExams.deleteMany({
-      exam: itemId,
-    });
-    await WaittingExams.deleteMany({
-      exam: itemId,
-    });
-
-    await PassedExams.deleteMany({
-      exam: itemId,
-    });
-    await FailledExams.deleteMany({
-      exam: itemId,
-    });
-    await ExpiredExams.deleteMany({
-      exam: itemId,
-    });
-    await TotalUserExams.deleteMany({
-      exam: itemId,
-    });
-    await WaittingAccounts.deleteMany({
-      account: itemId,
-    });
-    await UnpaidAccounts.deleteMany({
-      account: itemId,
-    });
-    await TotalUserAccounts.deleteMany({
-      account: itemId,
-    });
-    await ExpiredAccounts.deleteMany({
-      account: itemId,
-    });
-    await Purchases.findByIdAndDelete(purchaseId);
-
-    return {
-      message: "Purchase deleted",
-      deletedPurchase: purchase,
-    };
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to delete the purchase");
-  }
-};
-export const deleteUserPurchaseByAccessCode = async (accessCode) => {
-  try {
-    const purchase = await Purchases.findOne({ accessCode });
-
-    if (!purchase) {
-      throw new Error("Purchase not found");
-    }
-    const deletedPurchases = await Purchases.deleteOne({
-      accessCode: accessCode,
-    });
-    const purchaseAccessCode = purchase.accessCode;
-    await WaittingExams.deleteOne({ accessCode: purchaseAccessCode });
-    await TotalUserExams.deleteOne({ accessCode: purchaseAccessCode });
-
-    return {
-      message: "Purchase deleted successfully",
-      deletedPurchase: purchase,
-    };
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to delete the purchase by accessCode");
   }
 };

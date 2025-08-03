@@ -255,7 +255,7 @@ const options = {
                   },
                   role: {
                     type: "string",
-                    enum: ["student", "admin", "school","supperAdmin"],
+                    enum: ["student", "admin", "school", "supperAdmin"],
                   },
                 },
               },
@@ -352,7 +352,7 @@ const options = {
                   },
                   role: {
                     type: "string",
-                    enum: ["student", "admin", "school","supperAdmin"],
+                    enum: ["student", "admin", "school", "supperAdmin"],
                   },
                 },
               },

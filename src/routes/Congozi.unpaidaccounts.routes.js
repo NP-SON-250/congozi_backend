@@ -1,9 +1,14 @@
 import express from "express";
-import { getLoggedInUserUnpaidAccounts,getLoggedInUserSingleUnpaid } from "../controllers/Congozi.unpaidaccounts.controllers";
+import {
+  getLoggedInUserUnpaidAccounts,
+  getLoggedInUserSingleUnpaid,
+  deleteUnpaid,
+} from "../controllers/Congozi.unpaidaccounts.controllers";
 import { normal } from "../middleware/middleware";
 
 const unpaidAccountRoute = express.Router();
 unpaidAccountRoute.get("/", normal, getLoggedInUserUnpaidAccounts);
 unpaidAccountRoute.get("/:id", normal, getLoggedInUserSingleUnpaid);
+unpaidAccountRoute.delete("/:id", deleteUnpaid);
 
 export default unpaidAccountRoute;

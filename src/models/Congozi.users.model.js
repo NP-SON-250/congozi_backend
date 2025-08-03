@@ -20,8 +20,7 @@ const usersSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["student", "admin","supperAdmin", "school"],
-    default: "student",
+    enum: ["student", "admin", "supperAdmin", "school"],
   },
   purchasedExams: [{ type: mongoose.Schema.ObjectId, ref: "exams" }],
   purchasedAccounts: [{ type: mongoose.Schema.ObjectId, ref: "accounts" }],

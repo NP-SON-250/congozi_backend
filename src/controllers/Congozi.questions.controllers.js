@@ -67,7 +67,7 @@ export const deletsQuestion = async (req, res) => {
 };
 export const getAllQuestions = async (req, res) => {
   try {
-    const {exam} = req.params;
+    const { exam } = req.params;
     const questions = await questionService.getAllQuestions(exam);
     return res.status(200).json({
       status: "200",

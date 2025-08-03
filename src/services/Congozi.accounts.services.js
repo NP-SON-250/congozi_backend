@@ -44,9 +44,7 @@ export const updateAccount = async (id, accountData) => {
       });
 
       if (duplicate) {
-        throw new Error(
-          "An account type exist"
-        );
+        throw new Error("An account type exist");
       }
     }
     const updatedAccount = await Accounts.findByIdAndUpdate(id, accountData, {
@@ -69,13 +67,13 @@ export const deleteAccount = async (id) => {
       itemType: "exams",
     });
 
-
     await WaittingAccounts.deleteMany({
       account: id,
     });
     await UnpaidAccounts.deleteMany({
       account: id,
-    });await TotalUserAccounts.deleteMany({
+    });
+    await TotalUserAccounts.deleteMany({
       account: id,
     });
     await ExpiredAccounts.deleteMany({

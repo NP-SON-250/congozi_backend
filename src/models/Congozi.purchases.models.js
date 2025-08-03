@@ -9,13 +9,12 @@ const purchasesSchema = new mongoose.Schema({
   purchasedBy: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
   amount: { type: String },
   accessCode: { type: String },
-  invoiceNumber:{type:String},
   startDate: { type: Date },
   endDate: { type: Date },
   createdAt: { type: Date, default: Date.now },
   status: {
     type: String,
-    enum: ["pending", "complete", "expired"],
+    enum: ["pending", "complete","waitingConfirmation", "expired"],
     default: "pending",
   },
 });
