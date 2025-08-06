@@ -2,7 +2,7 @@ import WaittingAccounts from "../models/Congozi.waittingaccounts.models";
 
 export const getUserWaittingAccounts = async (userId) => {
   try {
-    const accounts = await WaittingAccounts.find({ purchasedBy: userId })
+    const accounts = await WaittingAccounts.find({ paidBy: userId })
       .populate({
         path: "account",
       })
@@ -18,7 +18,7 @@ export const getSingleUserWaittingAccounts = async (userId, id) => {
   try {
     const account = await WaittingAccounts.findOne({
       _id: id,
-      purchasedBy: userId,
+      paidBy: userId,
     }).populate({
       path: "account",
     });

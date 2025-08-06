@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 const usersSchema = new mongoose.Schema({
   fName: { type: String },
   lName: { type: String },
-  idCard: { type: String, unique: true },
+  idCard: { type: String },
   address: { type: String },
-  phone: { type: String, unique: true },
+  phone: { type: String },
   companyName: { type: String },
   tin: { type: String },
   email: {
@@ -21,6 +21,7 @@ const usersSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ["student", "admin", "supperAdmin", "school"],
+    default: "student",
   },
   purchasedExams: [{ type: mongoose.Schema.ObjectId, ref: "exams" }],
   purchasedAccounts: [{ type: mongoose.Schema.ObjectId, ref: "accounts" }],

@@ -2,7 +2,7 @@ import express from "express";
 import {
   addResponses,
   getUserResponses,
-  deleteResponse,
+  deleteResponse
 } from "../controllers/Congozi.responses.controllers";
 import { normal, supperAdmins } from "../middleware/middleware";
 const responsesRoute = express.Router();

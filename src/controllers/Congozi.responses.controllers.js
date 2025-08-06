@@ -47,7 +47,7 @@ export const addResponses = async (req, res) => {
     });
     await ExpiredExams.create({
       exam: examId,
-      purchasedBy: userId,
+      paidBy: userId,
     });
     let totalPoints = 0;
     for (const response of responses) {
@@ -59,12 +59,12 @@ export const addResponses = async (req, res) => {
     if (totalPoints >= 12) {
       await PassedExams.create({
         exam: examId,
-        purchasedBy: userId,
+        paidBy: userId,
       });
     } else {
       await FailledExams.create({
         exam: examId,
-        purchasedBy: userId,
+        paidBy: userId,
       });
     }
 

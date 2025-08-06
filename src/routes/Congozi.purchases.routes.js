@@ -11,15 +11,17 @@ import {
   purchasedAndPaidItem,
   getUserPurchase,
   deleteAccessCodePurchase,
+  getAllUserPayments,
 } from "../controllers/Congozi.purchases.controllers";
 import fileUpload from "../helper/multer";
-import { normal, supperAdmins } from "../middleware/middleware";
+import { admins, students, schools, normal, supperAdmins } from "../middleware/middleware";
 
 const purchaseRoute = express.Router();
 
 // GET routes
 purchaseRoute.get("/access/:code", normal, examByCode);
 purchaseRoute.get("/pending", normal, getUserPending);
+purchaseRoute.get("/all", normal, getAllUserPayments);
 purchaseRoute.get("/complete", normal, getUserComplete);
 purchaseRoute.get("/user", normal, getUserPurchase);
 purchaseRoute.get("/:purchaseId", normal, getLoggedInUserSinglePurchase);

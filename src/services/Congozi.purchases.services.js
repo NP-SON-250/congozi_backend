@@ -2,7 +2,7 @@ import UnpaidAccounts from "../models/Congozi.unpaidaccounts.models";
 import UnpaidExams from "../models/Congozi.unpaidexams.models";
 import WaittingAccounts from "../models/Congozi.waittingaccounts.models";
 import WaittingExams from "../models/Congozi.waittingexams.models";
-import Purchases from "../models/Congozi.purchases.models";
+import payments from "../models/Congozi.payments.models";
 import Exams from "../models/Congozi.exams.models";
 import Accounts from "../models/Congozi.accounts.models";
 import TotalUserExams from "../models/Congozi.totaluserexams.models";
@@ -25,7 +25,7 @@ const generateAccessCode = () => {
   return code;
 };
 
-export const makePurchase = async (userId, userRole, itemId) => {
+export const makepayments = async (userId, userRole, itemId) => {
   try {
     let itemType = null;
     let itemFees = null;
@@ -46,16 +46,16 @@ export const makePurchase = async (userId, userRole, itemId) => {
       throw new Error("Item not found in exams or accounts.");
     }
     if (userRole === "student" && itemType !== "exams") {
-      throw new Error("Students are only allowed to purchase exams.");
+      throw new Error("Students are only allowed to payments exams.");
     }
 
     if (userRole === "school" && itemType !== "accounts") {
-      throw new Error("Schools are only allowed to purchase accounts.");
+      throw new Error("Schools are only allowed to payments accounts.");
     }
-    const savedPurchase = await Purchases.create({
+    const savedpayments = await payments.create({
       itemType,
       itemId,
-      purchasedBy: userId,
+      paidBy: userId,
       amount: itemFees,
       accessCode: generateAccessCode(),
       startDate: null,
@@ -63,13 +63,13 @@ export const makePurchase = async (userId, userRole, itemId) => {
     });
 
     let items = null;
-    if (savedPurchase.itemType === "exams") {
-      items = await Exams.findById(savedPurchase.itemId);
-    } else if (savedPurchase.itemType === "accounts") {
-      items = await Accounts.findById(savedPurchase.itemId);
+    if (savedpayments.itemType === "exams") {
+      items = await Exams.findById(savedpayments.itemId);
+    } else if (savedpayments.itemType === "accounts") {
+      items = await Accounts.findById(savedpayments.itemId);
     }
     let endDate = null;
-    if (savedPurchase.itemType === "accounts" && savedPurchase.validIn) {
+    if (savedpayments.itemType === "accounts" && savedpayments.validIn) {
       const days = parseInt(item.validIn.replace(/\D/g, ""));
       endDate = new Date();
       endDate.setDate(endDate.getDate() + days);
@@ -77,37 +77,41 @@ export const makePurchase = async (userId, userRole, itemId) => {
     if (itemType === "exams") {
       await UnpaidExams.create({
         exam: itemId,
-        purchasedBy: userId,
+        paidBy: userId,
+        status: "pending",
+        purchaseId: savedpayments._id,
       });
     } else if (itemType === "accounts") {
       await UnpaidAccounts.create({
         account: itemId,
-        purchasedBy: userId,
+        paidBy: userId,
+        status: "pending",
+        purchaseId: savedpayments._id,
       });
     }
     if (itemType === "exams") {
       await TotalUserExams.create({
         exam: itemId,
-        accessCode: savedPurchase.accessCode,
-        purchasedBy: userId,
+        accessCode: savedpayments.accessCode,
+        paidBy: userId,
       });
     } else if (itemType === "accounts") {
       await TotalUserAccounts.create({
         account: itemId,
-        purchasedBy: userId,
+        paidBy: userId,
       });
     }
 
     return {
-      message: `${itemType} has been purchased.`,
-      purchase: savedPurchase,
+      message: `${itemType} has been paymentsd.`,
+      payments: savedpayments,
     };
   } catch (error) {
     console.error(error);
-    throw new Error(`Error making purchase: ${error.message}`);
+    throw new Error(`Error making payments: ${error.message}`);
   }
 };
-export const makePaidPurchase = async (userId, userRole, itemId) => {
+export const makePaidpayments = async (userId, userRole, itemId) => {
   try {
     let itemType = null;
     let itemFees = null;
@@ -128,11 +132,11 @@ export const makePaidPurchase = async (userId, userRole, itemId) => {
       throw new Error("Item not found in exams or accounts.");
     }
     if (userRole === "student" && itemType !== "exams") {
-      throw new Error("Students are only allowed to purchase exams.");
+      throw new Error("Students are only allowed to payments exams.");
     }
 
     if (userRole === "school" && itemType !== "accounts") {
-      throw new Error("Schools are only allowed to purchase accounts.");
+      throw new Error("Schools are only allowed to payments accounts.");
     }
     let endDate = null;
     if (itemType === "accounts") {
@@ -140,60 +144,60 @@ export const makePaidPurchase = async (userId, userRole, itemId) => {
       endDate = new Date();
       endDate.setDate(endDate.getDate() + days);
     }
-    const savedPurchase = await Purchases.create({
+    const savedpayments = await payments.create({
       itemType,
       itemId,
-      purchasedBy: userId,
+      paidBy: userId,
       amount: itemFees,
       accessCode: generateAccessCode(),
       startDate: new Date(),
       endDate,
     });
     let items = null;
-    if (savedPurchase.itemType === "exams") {
-      items = await Exams.findById(savedPurchase.itemId);
-    } else if (savedPurchase.itemType === "accounts") {
-      items = await Accounts.findById(savedPurchase.itemId);
+    if (savedpayments.itemType === "exams") {
+      items = await Exams.findById(savedpayments.itemId);
+    } else if (savedpayments.itemType === "accounts") {
+      items = await Accounts.findById(savedpayments.itemId);
     }
     if (itemType === "exams") {
       await WaittingExams.create({
         exam: itemId,
-        accessCode: savedPurchase.accessCode,
-        purchasedBy: userId,
+        accessCode: savedpayments.accessCode,
+        paidBy: userId,
       });
     } else if (itemType === "accounts") {
       await WaittingAccounts.create({
         account: itemId,
-        purchasedBy: userId,
+        paidBy: userId,
       });
     }
     if (itemType === "exams") {
       await TotalUserExams.create({
         exam: itemId,
-        accessCode: savedPurchase.accessCode,
-        purchasedBy: userId,
+        accessCode: savedpayments.accessCode,
+        paidBy: userId,
       });
     } else if (itemType === "accounts") {
       await TotalUserAccounts.create({
         account: itemId,
-        purchasedBy: userId,
+        paidBy: userId,
       });
     }
 
     return {
-      message: `${itemType} has been purchased.`,
-      purchase: savedPurchase,
+      message: `${itemType} has been paymentsd.`,
+      payments: savedpayments,
     };
   } catch (error) {
     console.error(error);
-    throw new Error(`Error making purchase: ${error.message}`);
+    throw new Error(`Error making payments: ${error.message}`);
   }
 };
-export const updatePurchase = async (id, purchaseData) => {
+export const updatepayments = async (id, purchaseData) => {
   const { status } = purchaseData;
 
   try {
-    const purchaseExist = await Purchases.findById(id);
+    const purchaseExist = await payments.findById(id);
     if (!purchaseExist) {
       throw new Error("Payment not found");
     }
@@ -212,7 +216,7 @@ export const updatePurchase = async (id, purchaseData) => {
       purchaseData.endDate = endDate;
     }
 
-    const updatedPurchase = await Purchases.findByIdAndUpdate(
+    const updatedPurchase = await payments.findByIdAndUpdate(
       id,
       purchaseData,
       {
@@ -220,21 +224,21 @@ export const updatePurchase = async (id, purchaseData) => {
       }
     );
     if (updatedPurchase.status === "complete") {
-      const { itemId, itemType, purchasedBy } = updatedPurchase;
+      const { itemId, itemType, paidBy } = updatedPurchase;
 
       if (itemType === "exams") {
         await WaittingExams.create({
           exam: itemId,
           accessCode: updatedPurchase.accessCode,
-          purchasedBy: purchasedBy,
+          paidBy: paidBy,
         });
-        await UnpaidExams.deleteOne({ exam: itemId, purchasedBy });
+        await UnpaidExams.deleteOne({ exam: itemId, paidBy });
       } else if (itemType === "accounts") {
         await WaittingAccounts.create({
           account: itemId,
-          purchasedBy: purchasedBy,
+          paidBy: paidBy,
         });
-        await UnpaidAccounts.deleteOne({ account: itemId, purchasedBy });
+        await UnpaidAccounts.deleteOne({ account: itemId, paidBy });
       }
       const note = await Notify.findOne({ purchasedItem: id });
       if (note) {
@@ -255,5 +259,201 @@ export const updatePurchase = async (id, purchaseData) => {
     return updatedPurchase;
   } catch (error) {
     throw new Error(`Error updating purchase: ${error.message}`);
+  }
+};
+export const getUserspayments = async (userId) => {
+  try {
+    const userpayments = await payments
+      .find({ paidBy: userId })
+      .populate("paidBy")
+      .populate("itemId")
+      .sort({ createdAt: -1 });
+
+    return userpayments;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to retrieve user payments");
+  }
+};
+export const getAdminpayments = async () => {
+  try {
+    const allpayments = await payments
+      .find()
+      .populate("paidBy")
+      .populate("itemId")
+      .sort({ createdAt: -1 });
+
+    return allpayments;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to retrieve user payments");
+  }
+};
+
+export const getPendingpayments = async (userId) => {
+  try {
+    const pendingpayments = await payments
+      .find({
+        paidBy: userId,
+        status: "pending",
+      })
+      .populate("paidBy")
+      .populate("itemId")
+      .sort({ createdAt: -1 });
+
+    return pendingpayments;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to retrieve user payments");
+  }
+};
+export const getAllPayments = async (userId) => {
+  try {
+    const pendingpayments = await payments
+      .find({
+        paidBy: userId,
+      })
+      .populate("paidBy")
+      .populate("itemId")
+      .sort({ createdAt: -1 });
+
+    return pendingpayments;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to retrieve user payments");
+  }
+};
+export const getCompletepayments = async (userId) => {
+  try {
+    const completedpayments = await payments
+      .find({
+        paidBy: userId,
+        status: "complete",
+      })
+      .populate("paidBy")
+      .populate("itemId")
+      .sort({ createdAt: -1 });
+
+    return completedpayments;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to retrieve user payments");
+  }
+};
+export const getExamsByAccessCode = async (code, userId) => {
+  try {
+    const exam = await payments
+      .findOne({
+        accessCode: code,
+        paidBy: userId,
+      })
+      .populate("paidBy")
+      .populate("itemId");
+
+    if (!exam) {
+      throw new Error("No exam not found with this access code.");
+    }
+
+    return exam;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to retrieve the exams by access code");
+  }
+};
+
+export const getSingleUserpayments = async (userId, paymentsId) => {
+  try {
+    const payments = await payments
+      .findOne({
+        _id: paymentsId,
+        paidBy: userId,
+      })
+      .populate({
+        path: "itemId",
+      });
+
+    if (!payments) {
+      throw new Error("payments not found or unauthorized access");
+    }
+
+    return payments;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to retrieve the payments");
+  }
+};
+
+export const deleteUserpayments = async (paymentsId) => {
+  try {
+    const payments = await payments.findById(paymentsId);
+
+    if (!payments) {
+      throw new Error("payments not found");
+    }
+
+    const itemId = payments.itemId;
+    await UnpaidExams.deleteMany({
+      exam: itemId,
+    });
+    await WaittingExams.deleteMany({
+      exam: itemId,
+    });
+
+    await PassedExams.deleteMany({
+      exam: itemId,
+    });
+    await FailledExams.deleteMany({
+      exam: itemId,
+    });
+    await ExpiredExams.deleteMany({
+      exam: itemId,
+    });
+    await TotalUserExams.deleteMany({
+      exam: itemId,
+    });
+    await WaittingAccounts.deleteMany({
+      account: itemId,
+    });
+    await UnpaidAccounts.deleteMany({
+      account: itemId,
+    });
+    await TotalUserAccounts.deleteMany({
+      account: itemId,
+    });
+    await ExpiredAccounts.deleteMany({
+      account: itemId,
+    });
+    await payments.findByIdAndDelete(paymentsId);
+
+    return {
+      message: "payments deleted",
+      deletedpayments: payments,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to delete the payments");
+  }
+};
+export const deleteUserpaymentsByAccessCode = async (accessCode) => {
+  try {
+    const payments = await payments.findOne({ accessCode });
+
+    if (!payments) {
+      throw new Error("payments not found");
+    }
+    const deletedpayments = await payments.deleteOne({
+      accessCode: accessCode,
+    });
+    const paymentsAccessCode = payments.accessCode;
+    await WaittingExams.deleteOne({ accessCode: paymentsAccessCode });
+    await TotalUserExams.deleteOne({ accessCode: paymentsAccessCode });
+
+    return {
+      message: "payments deleted successfully",
+      deletedpayments: payments,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to delete the payments by accessCode");
   }
 };

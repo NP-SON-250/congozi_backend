@@ -2,7 +2,7 @@ import TotalUserExams from "../models/Congozi.totaluserexams.models";
 
 export const getTotalUserExams = async (userId) => {
   try {
-    const exams = await TotalUserExams.find({ purchasedBy: userId })
+    const exams = await TotalUserExams.find({ paidBy: userId })
       .populate({
         path: "exam",
       })
@@ -18,7 +18,7 @@ export const getSingleTotalUserExams = async (userId, id) => {
   try {
     const exam = await TotalUserExams.findOne({
       _id: id,
-      purchasedBy: userId,
+      paidBy: userId,
     }).populate({
       path: "exam",
     });

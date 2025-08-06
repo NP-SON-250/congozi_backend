@@ -1,8 +1,5 @@
 import express from "express";
-import {
-  getLoggedInUserWaittingAccounts,
-  getLoggedInUserSingleWaitting,
-} from "../controllers/Congozi.waittingaccounts.controllers";
+import { getLoggedInUserWaittingAccounts, getLoggedInUserSingleWaitting } from "../controllers/Congozi.waittingaccounts.controllers";
 import { normal } from "../middleware/middleware";
 
 const waittingAccountRoute = express.Router();

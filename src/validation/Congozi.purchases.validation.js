@@ -3,7 +3,7 @@ import Joi from "joi";
 const createPurchaseSchema = Joi.object({
   itemType: Joi.string().valid("exams", "accounts").optional(),
   itemId: Joi.string().optional(),
-  purchasedBy: Joi.string().optional(),
+  paidBy: Joi.string().optional(),
 });
 export const validateCreatePurchase = (purchaseData) => {
   return createPurchaseSchema.validate(purchaseData);
@@ -11,9 +11,9 @@ export const validateCreatePurchase = (purchaseData) => {
 const updatePurchaseSchema = Joi.object({
   itemType: Joi.string().valid("exams", "accounts").optional(),
   itemId: Joi.string().optional(),
-  purchasedBy: Joi.string().optional(),
+  paidBy: Joi.string().optional(),
   status: Joi.string()
-    .valid("pending", "complete", "waitingConfirmation", "expired")
+    .valid("pending", "complete", "expired", "waitingConfirmation")
     .optional(),
 });
 export const validateUpdatePurchase = (purchaseData) => {

@@ -3,18 +3,6 @@ import {
   validateCreatePurchase,
   validateUpdatePurchase,
 } from "../validation/Congozi.purchases.validation";
-import Purchases from "../models/Congozi.purchases.models";
-import UnpaidAccounts from "../models/Congozi.unpaidaccounts.models";
-import UnpaidExams from "../models/Congozi.unpaidexams.models";
-import WaittingAccounts from "../models/Congozi.waittingaccounts.models";
-import WaittingExams from "../models/Congozi.waittingexams.models";
-import TotalUserExams from "../models/Congozi.totaluserexams.models";
-import TotalUserAccounts from "../models/Congozi.totaluseraccounts.models";
-import PassedExams from "../models/Congozi.passedexams.models";
-import FailledExams from "../models/Congozi.failedexams.models";
-import ExpiredExams from "../models/Congozi.expiredexams.models";
-import ExpiredAccounts from "../models/Congozi.expiredaccounts.models";
-
 export const purchasedItem = async (req, res) => {
   const { error, value } = validateCreatePurchase(req.body);
   if (error) {
@@ -25,14 +13,12 @@ export const purchasedItem = async (req, res) => {
     const userId = req.loggedInUser.id;
     const userRole = req.loggedInUser.role;
     const { itemId } = req.params;
-
-    const result = await purchaseServices.makePurchase(
+    const result = await purchaseServices.makepayments(
       userId,
       userRole,
       itemId,
       value
     );
-
     return res.status(201).json({
       status: "201",
       message: "Purchase created",
@@ -57,14 +43,12 @@ export const purchasedAndPaidItem = async (req, res) => {
     const userId = req.loggedInUser.id;
     const userRole = req.loggedInUser.role;
     const { itemId } = req.params;
-
-    const result = await purchaseServices.makePaidPurchase(
+    const result = await purchaseServices.makePaidpayments(
       userId,
       userRole,
       itemId,
       value
     );
-
     return res.status(201).json({
       status: "201",
       message: "Purchase and paid success",
@@ -87,7 +71,7 @@ export const updatedPurchase = async (req, res) => {
   }
   try {
     const { id } = req.params;
-    const updatepayment = await purchaseServices.updatePurchase(id, value);
+    const updatepayment = await purchaseServices.updatepayments(id, value);
 
     return res.status(200).json({
       message: "Purchase updated",
@@ -104,13 +88,7 @@ export const updatedPurchase = async (req, res) => {
 export const getUserPending = async (req, res) => {
   try {
     const userId = req.loggedInUser.id;
-    const purchases = await Purchases.find({
-      purchasedBy: userId,
-      status: "pending",
-    })
-      .populate("purchasedBy")
-      .populate("itemId")
-      .sort({ createdAt: -1 });
+    const purchases = await purchaseServices.getPendingpayments(userId);
 
     return res.status(200).json({
       status: "200",
@@ -126,17 +104,29 @@ export const getUserPending = async (req, res) => {
     });
   }
 };
-//Complete
+export const getAllUserPayments = async (req, res) => {
+  try {
+    const userId = req.loggedInUser.id;
+    const purchases = await purchaseServices.getAllPayments(userId);
+
+    return res.status(200).json({
+      status: "200",
+      message: "Purchases retrieved",
+      data: purchases,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "500",
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
 export const getUserComplete = async (req, res) => {
   try {
     const userId = req.loggedInUser.id;
-    const purchases = await Purchases.find({
-      purchasedBy: userId,
-      status: "complete",
-    })
-      .populate("purchasedBy")
-      .populate("itemId")
-      .sort({ createdAt: -1 });
+    const purchases = await purchaseServices.getCompletepayments(userId);
 
     return res.status(200).json({
       status: "200",
@@ -152,15 +142,12 @@ export const getUserComplete = async (req, res) => {
     });
   }
 };
-//Purchased exam by code
+
 export const examByCode = async (req, res) => {
   try {
     const { code } = req.params;
-
-    // Retrieve the payment using the access code
-    const exams = await Purchases.findOne({ accessCode: code })
-      .populate("purchasedBy")
-      .populate("itemId");
+    const userId = req.loggedInUser.id;
+    const exams = await purchaseServices.getExamsByAccessCode(code, userId);
 
     return res.status(200).json({
       status: "200",
@@ -176,13 +163,10 @@ export const examByCode = async (req, res) => {
     });
   }
 };
-//Admin
+
 export const getUserAdmin = async (req, res) => {
   try {
-    const purchases = await Purchases.find()
-      .populate("purchasedBy")
-      .populate("itemId")
-      .sort({ createdAt: -1 });
+    const purchases = await purchaseServices.getAdminpayments();
 
     return res.status(200).json({
       status: "200",
@@ -198,14 +182,11 @@ export const getUserAdmin = async (req, res) => {
     });
   }
 };
-//Admin
+
 export const getUserPurchase = async (req, res) => {
   try {
     const userId = req.loggedInUser.id;
-    const purchases = await Purchases.find({ purchasedBy: userId })
-      .populate("purchasedBy")
-      .populate("itemId")
-      .sort({ createdAt: -1 });
+    const purchases = await purchaseServices.getUserspayments(userId);
 
     return res.status(200).json({
       status: "200",
@@ -227,12 +208,10 @@ export const getLoggedInUserSinglePurchase = async (req, res) => {
     const userId = req.loggedInUser.id;
     const { purchaseId } = req.params;
 
-    const purchase = await Purchases.findOne({
-      _id: purchaseId,
-      purchasedBy: userId,
-    }).populate({
-      path: "itemId",
-    });
+    const purchase = await purchaseServices.getSingleUserPurchase(
+      userId,
+      purchaseId
+    );
 
     return res.status(200).json({
       status: "200",
@@ -253,49 +232,7 @@ export const deleteLoggedInUserPurchase = async (req, res) => {
   try {
     const { purchaseId } = req.params;
 
-    const purchase = await Purchases.findById(purchaseId);
-
-    if (!purchase) {
-      return res.status(404).json({
-        status: "404",
-        message: "Purchase not found",
-        data: result,
-      });
-    }
-
-    const itemId = purchase.itemId;
-    await UnpaidExams.deleteMany({
-      exam: itemId,
-    });
-    await WaittingExams.deleteMany({
-      exam: itemId,
-    });
-
-    await PassedExams.deleteMany({
-      exam: itemId,
-    });
-    await FailledExams.deleteMany({
-      exam: itemId,
-    });
-    await ExpiredExams.deleteMany({
-      exam: itemId,
-    });
-    await TotalUserExams.deleteMany({
-      exam: itemId,
-    });
-    await WaittingAccounts.deleteMany({
-      account: itemId,
-    });
-    await UnpaidAccounts.deleteMany({
-      account: itemId,
-    });
-    await TotalUserAccounts.deleteMany({
-      account: itemId,
-    });
-    await ExpiredAccounts.deleteMany({
-      account: itemId,
-    });
-    await Purchases.findByIdAndDelete(purchaseId);
+    const result = await purchaseServices.deleteUserpayments(purchaseId);
 
     return res.status(200).json({
       status: "200",
@@ -312,32 +249,19 @@ export const deleteLoggedInUserPurchase = async (req, res) => {
   }
 };
 
-// Delete purchase by accessCode
 export const deleteAccessCodePurchase = async (req, res) => {
   try {
     const { accessCode } = req.params;
 
-    const purchase = await Purchases.findOne({ accessCode });
+    const result = await purchaseServices.deleteUserpaymentsByAccessCode(
+      accessCode
+    );
 
-    if (!purchase) {
-      return res.status(404).json({
-        status: "404",
-        message: "Purchase not found",
-        data: result,
-      });
-    }
-    if (purchase) {
-      const id = purchase._id;
-      const deletedPurchases = await Purchases.findByIdAndDelete(id);
-      const purchaseAccessCode = purchase.accessCode;
-      await WaittingExams.deleteOne({ accessCode: purchaseAccessCode });
-
-      return res.status(200).json({
-        status: "200",
-        message: "Purchase deleted",
-        data: deletedPurchases,
-      });
-    }
+    return res.status(200).json({
+      status: "200",
+      message: "Purchase deleted",
+      data: result,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({

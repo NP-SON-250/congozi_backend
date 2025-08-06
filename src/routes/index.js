@@ -18,6 +18,7 @@ import waittingAccountRoute from "./Congozi.waittingaccounts.routes";
 import waittingExamRoute from "./Congozi.waittingexams.routes";
 import responsesRoute from "./Congozi.responses.routes";
 import notificationsRoute from "./Congozi.notifications.routes";
+
 const router = express.Router();
 
 router.use("/docs", docrouter);

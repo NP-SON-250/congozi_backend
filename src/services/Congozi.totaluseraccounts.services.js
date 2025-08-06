@@ -2,7 +2,7 @@ import TotalUserAccounts from "../models/Congozi.totaluseraccounts.models";
 
 export const getTotalUserAccounts = async (userId) => {
   try {
-    const accounts = await TotalUserAccounts.find({ purchasedBy: userId })
+    const accounts = await TotalUserAccounts.find({ paidBy: userId })
       .populate({
         path: "account",
       })
@@ -19,7 +19,7 @@ export const getSingleTotalUserAccounts = async (userId, id) => {
   try {
     const account = await TotalUserAccounts.findOne({
       _id: id,
-      purchasedBy: userId,
+      paidBy: userId,
     }).populate({
       path: "accounts",
     });

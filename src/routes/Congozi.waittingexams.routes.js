@@ -1,8 +1,5 @@
 import express from "express";
-import {
-  getLoggedInUserWaittingExams,
-  getLoggedInUserSingleWaitting,
-} from "../controllers/Congozi.waittingexams.controllers";
+import { getLoggedInUserWaittingExams, getLoggedInUserSingleWaitting } from "../controllers/Congozi.waittingexams.controllers";
 import { normal } from "../middleware/middleware";
 
 const waittingExamRoute = express.Router();

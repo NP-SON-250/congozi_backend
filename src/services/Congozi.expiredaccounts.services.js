@@ -2,7 +2,7 @@ import ExpiredAccounts from "../models/Congozi.expiredaccounts.models";
 
 export const getUserExpiredAccounts = async (userId) => {
   try {
-    const accounts = await ExpiredAccounts.find({ purchasedBy: userId })
+    const accounts = await ExpiredAccounts.find({ paidBy: userId })
       .populate({
         path: "account",
       })
@@ -18,7 +18,7 @@ export const getSingleUserExpiredAccounts = async (userId, id) => {
   try {
     const account = await ExpiredAccounts.findOne({
       _id: id,
-      purchasedBy: userId,
+      paidBy: userId,
     }).populate({
       path: "account",
     });

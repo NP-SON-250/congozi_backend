@@ -2,7 +2,10 @@ import UnpaidAccounts from "../models/Congozi.unpaidaccounts.models";
 
 export const getUserUnpaidAccounts = async (userId) => {
   try {
-    const accounts = await UnpaidAccounts.find({ purchasedBy: userId })
+    const accounts = await UnpaidAccounts.find({
+      paidBy: userId,
+      status: "pending",
+    })
       .populate({
         path: "account",
       })
@@ -19,7 +22,7 @@ export const getSingleUserUnpaidAccounts = async (userId, id) => {
   try {
     const account = await UnpaidAccounts.findOne({
       _id: id,
-      purchasedBy: userId,
+      paidBy: userId,
     }).populate({
       path: "account",
     });

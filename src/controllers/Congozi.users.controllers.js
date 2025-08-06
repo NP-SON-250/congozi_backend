@@ -7,6 +7,29 @@ import generateToken from "../utils/generateToken";
 import Users from "../models/Congozi.users.model";
 import bcrypt from "bcrypt";
 import { uploadToCloud } from "../helper/cloud";
+
+export const updateUser = async (req, res) => {
+  const { error, value } = validateUpdateUser(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
+  try {
+    const { id } = req.params;
+    const updatedUser = await userService.updateUser(id, value, req.file);
+
+    return res.status(200).json({
+      message: "User updated",
+      data: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "500",
+      message: "Habayemo ikibazo kidasanzwe",
+      error: error.message,
+    });
+  }
+};
 export const createUsers = async (req, res, file) => {
   const {
     fName,
@@ -85,7 +108,6 @@ export const createUsers = async (req, res, file) => {
       tin,
       password: hashedPassword,
       profile: savedProfile,
-      role,
     };
     const user = await Users.create(newUserData);
 
@@ -103,49 +125,14 @@ export const createUsers = async (req, res, file) => {
     });
   }
 };
-
-export const updateUser = async (req, res) => {
-  const { error, value } = validateUpdateUser(req.body);
+export const login = async (req, res) => {
+  const { error, value } = validateLoginUser(req.body);
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
 
   try {
-    const { id } = req.params;
-    const updatedUser = await userService.updateUser(id, value, req.file);
-
-    return res.status(200).json({
-      message: "User updated",
-      data: updatedUser,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "500",
-      message: "Habayemo ikibazo kidasanzwe",
-      error: error.message,
-    });
-  }
-};
-
-export const login = async (req, res) => {
-  try {
-    const { identifier, password } = req.body;
-    const user = await Users.findOne({
-      $or: [{ email: identifier }, { phone: identifier }],
-    });
-    if (!user) {
-      return res.status(404).json({
-        status: "404",
-        message: "User name not found",
-      });
-    }
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({
-        status: "400",
-        message: "Invalid password",
-      });
-    }
+    const user = await userService.loginUser(value);
     const token = generateToken(user._id);
     res.status(200).json({
       message: "Kwinjira byakunze",
@@ -228,64 +215,6 @@ export const getUserById = async (req, res) => {
     return res.status(500).json({
       status: "500",
       message: "Habayemo ikibazo kidasanzwe",
-      error: error.message,
-    });
-  }
-};
-
-export const getLastWeekUsersCount = async (req, res) => {
-  try {
-    const today = new Date();
-
-    const startOfLastWeek = new Date(today);
-    startOfLastWeek.setDate(today.getDate() - 14);
-    startOfLastWeek.setHours(0, 0, 0, 0);
-
-    const endOfLastWeek = new Date(today);
-    endOfLastWeek.setDate(today.getDate() - 7);
-    endOfLastWeek.setHours(23, 59, 59, 999);
-
-    const count = await Users.countDocuments({
-      createdAt: {
-        $gte: startOfLastWeek,
-        $lte: endOfLastWeek,
-      },
-    });
-
-    return res.status(200).json({
-      status: "200",
-      message: "Users created during last week",
-      count: count,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: "500",
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
-};
-
-export const getCurrentWeekUsersCount = async (req, res) => {
-  try {
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-    const count = await Users.countDocuments({
-      createdAt: { $gte: oneWeekAgo },
-    });
-
-    return res.status(200).json({
-      status: "200",
-      message: "Current week users counts",
-      count: count,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: "500",
-      message: "Internal server error",
       error: error.message,
     });
   }

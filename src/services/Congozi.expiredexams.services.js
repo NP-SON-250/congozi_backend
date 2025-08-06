@@ -2,7 +2,7 @@ import ExpiredExams from "../models/Congozi.expiredexams.models";
 
 export const getUserExpiredExams = async (userId) => {
   try {
-    const exams = await ExpiredExams.find({ purchasedBy: userId })
+    const exams = await ExpiredExams.find({ paidBy: userId })
       .populate({
         path: "exam",
       })
@@ -18,7 +18,7 @@ export const getSingleUserExpiredExams = async (userId, id) => {
   try {
     const exam = await ExpiredExams.findOne({
       _id: id,
-      purchasedBy: userId,
+      paidBy: userId,
     }).populate({
       path: "exam",
     });

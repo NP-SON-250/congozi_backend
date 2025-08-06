@@ -1,9 +1,8 @@
-import Accounts from "../models/Congozi.accounts.models";
 import * as accountsService from "../services/Congozi.accounts.services";
-import {
-  validateCreateAccount,
-  validateUpdateAccount,
-} from "../validation/Congozi.accounts.validation";
+import { 
+    validateCreateAccount,
+    validateUpdateAccount
+ } from "../validation/Congozi.accounts.validation";
 export const createAccount = async (req, res) => {
   const { error, value } = validateCreateAccount(req.body);
   if (error) {
@@ -91,64 +90,6 @@ export const getAccountById = async (req, res) => {
       data: acccount,
     });
   } catch (error) {
-    return res.status(500).json({
-      status: "500",
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
-};
-
-export const getLastWeekAccountsCount = async (req, res) => {
-  try {
-    const today = new Date();
-
-    const startOfLastWeek = new Date(today);
-    startOfLastWeek.setDate(today.getDate() - 14);
-    startOfLastWeek.setHours(0, 0, 0, 0);
-
-    const endOfLastWeek = new Date(today);
-    endOfLastWeek.setDate(today.getDate() - 7);
-    endOfLastWeek.setHours(23, 59, 59, 999);
-
-    const count = await Accounts.countDocuments({
-      createdAt: {
-        $gte: startOfLastWeek,
-        $lte: endOfLastWeek,
-      },
-    });
-
-    return res.status(200).json({
-      status: "200",
-      message: "Accounts created during last week",
-      count: count,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: "500",
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
-};
-
-export const getCurrentWeekAccountsCount = async (req, res) => {
-  try {
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-    const count = await Accounts.countDocuments({
-      createdAt: { $gte: oneWeekAgo },
-    });
-
-    return res.status(200).json({
-      status: "200",
-      message: "Current week accounts counts",
-      count: count,
-    });
-  } catch (error) {
-    console.error(error);
     return res.status(500).json({
       status: "500",
       message: "Internal server error",

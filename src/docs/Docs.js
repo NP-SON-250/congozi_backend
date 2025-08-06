@@ -255,7 +255,7 @@ const options = {
                   },
                   role: {
                     type: "string",
-                    enum: ["student", "admin", "school", "supperAdmin"],
+                    enum: ["student", "admin", "school","supperAdmin"],
                   },
                 },
               },
@@ -352,7 +352,7 @@ const options = {
                   },
                   role: {
                     type: "string",
-                    enum: ["student", "admin", "school", "supperAdmin"],
+                    enum: ["student", "admin", "school","supperAdmin"],
                   },
                 },
               },
@@ -1284,7 +1284,7 @@ const options = {
         },
       },
     },
-    "/api/v1/purchases/pending": {
+    "/api/v1/purchases/all": {
       get: {
         tags: ["Purchases"],
         summary: "Read your pending purchases",

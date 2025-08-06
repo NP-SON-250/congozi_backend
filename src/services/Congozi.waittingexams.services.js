@@ -1,7 +1,7 @@
 import WaittingExams from "../models/Congozi.waittingexams.models";
 export const getUserWaittingExams = async (userId) => {
   try {
-    const exams = await WaittingExams.find({ purchasedBy: userId })
+    const exams = await WaittingExams.find({ paidBy: userId })
       .populate({
         path: "exam",
       })
@@ -17,7 +17,7 @@ export const getSingleUserWaittingExam = async (userId, id) => {
   try {
     const exam = await WaittingExams.findOne({
       _id: id,
-      purchasedBy: userId,
+      paidBy: userId,
     }).populate({
       path: "exam",
     });

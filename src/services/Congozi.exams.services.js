@@ -1,5 +1,5 @@
 import Exams from "../models/Congozi.exams.models";
-import Purchases from "../models/Congozi.purchases.models";
+import payments from "../models/Congozi.payments.models";
 import responsesModel from "../models/Congozi.responses.models";
 import UnpaidExams from "../models/Congozi.unpaidexams.models";
 import WaittingExams from "../models/Congozi.waittingexams.models";
@@ -115,7 +115,7 @@ export const deleteExam = async (id) => {
     if (!isExist) {
       throw new Error("Exam not found");
     }
-    await Purchases.deleteMany({
+    await payments.deleteMany({
       itemId: id,
       itemType: "exams",
     });
