@@ -10,10 +10,9 @@ import TotalUserExams from "../models/Congozi.totaluserexams.models";
 
 export const getExamByNumber = async (number) => {
   try {
-    const { type } = "kora" || "kora";
     const isExist = await Exams.findOne({
       number,
-      type: { $regex: /^kora$/, $options: "i" },
+      type: { $regex: /^gukora$/, $options: "i" },
     }).populate({
       path: "questions",
       populate: {
