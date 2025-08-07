@@ -436,24 +436,21 @@ export const deleteUserpayments = async (paymentsId) => {
 };
 export const deleteUserpaymentsByAccessCode = async (accessCode) => {
   try {
-    const payments = await payments.findOne({ accessCode });
+    const payment = await payments.findOne({ accessCode });
 
-    if (!payments) {
-      throw new Error("payments not found");
+    if (!payment) {
+      throw new Error("Payment not found");
     }
-    const deletedpayments = await payments.deleteOne({
-      accessCode: accessCode,
-    });
-    const paymentsAccessCode = payments.accessCode;
-    await WaittingExams.deleteOne({ accessCode: paymentsAccessCode });
-    await TotalUserExams.deleteOne({ accessCode: paymentsAccessCode });
+    const deletedPayment = await payments.deleteOne({ accessCode });
+
+    await WaittingExams.deleteOne({ accessCode });
 
     return {
-      message: "payments deleted successfully",
-      deletedpayments: payments,
+      message: "Payment and related waiting exam deleted",
+      deletedPayment,
     };
   } catch (error) {
     console.error(error);
-    throw new Error("Failed to delete the payments by accessCode");
+    throw new Error("Failed to delete the payment by accessCode");
   }
 };
