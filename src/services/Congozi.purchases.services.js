@@ -98,6 +98,7 @@ export const makepayments = async (userId, userRole, itemId) => {
     } else if (itemType === "accounts") {
       await TotalUserAccounts.create({
         account: itemId,
+        accessCode: savedpayments.accessCode,
         paidBy: userId,
       });
     }
@@ -216,13 +217,9 @@ export const updatepayments = async (id, purchaseData) => {
       purchaseData.endDate = endDate;
     }
 
-    const updatedPurchase = await payments.findByIdAndUpdate(
-      id,
-      purchaseData,
-      {
-        new: true,
-      }
-    );
+    const updatedPurchase = await payments.findByIdAndUpdate(id, purchaseData, {
+      new: true,
+    });
     if (updatedPurchase.status === "complete") {
       const { itemId, itemType, paidBy } = updatedPurchase;
 
@@ -236,6 +233,7 @@ export const updatepayments = async (id, purchaseData) => {
       } else if (itemType === "accounts") {
         await WaittingAccounts.create({
           account: itemId,
+          accessCode: updatedPurchase.accessCode,
           paidBy: paidBy,
         });
         await UnpaidAccounts.deleteOne({ account: itemId, paidBy });

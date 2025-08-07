@@ -4,7 +4,7 @@ export const getUserUnpaidAccounts = async (userId) => {
   try {
     const accounts = await UnpaidAccounts.find({
       paidBy: userId,
-      status: "pending",
+      status: { $ne: "complete" },
     })
       .populate({
         path: "account",
