@@ -7,11 +7,11 @@ import {
     createQuestions
  } from "../controllers/Congozi.questions.controllers";
 import fileUpload from "../helper/multer";
-import { supperAdmins } from "../middleware/middleware";
+import { normal, supperAdmins } from "../middleware/middleware";
 
 const questionRoute = express.Router();
-questionRoute.post("/:id", fileUpload.single("image"), createQuestions);
-questionRoute.put("/:id", fileUpload.single("image"), updateQuestion);
+questionRoute.post("/:id",normal, fileUpload.single("image"), createQuestions);
+questionRoute.put("/:id", normal,fileUpload.single("image"), updateQuestion);
 questionRoute.delete("/:id",supperAdmins, deletsQuestion);
 questionRoute.get("/:exam", getAllQuestions);
 questionRoute.get("/single/:id", getQuestionById);

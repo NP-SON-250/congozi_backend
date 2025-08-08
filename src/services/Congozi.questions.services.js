@@ -22,7 +22,7 @@ export const createQuestions = async (id, questionData, file) => {
       phrase,
       marks,
       image: imageUrl,
-      exam:id,
+      exam: id,
     });
     await Exams.findByIdAndUpdate(
       id,
@@ -56,14 +56,23 @@ export const updateQuestion = async (id, questionData, file) => {
     if (duplicate) {
       throw new Error("This question already exists");
     }
+    let imageUrl = null;
     if (file) {
       const result = await uploadToCloud(file);
-      questionData.image = result.secure_url;
+      imageUrl = result.secure_url;
     }
 
-    const updatedQuestion = await Questions.findByIdAndUpdate(id, questionData, {
-      new: true,
-    });
+    const updatedQuestion = await Questions.findByIdAndUpdate(
+      id,
+      {
+        phrase,
+        marks,
+        image: imageUrl,
+      },
+      {
+        new: true,
+      }
+    );
 
     return updatedQuestion;
   } catch (error) {
@@ -77,10 +86,7 @@ export const deleteQuestion = async (id) => {
     if (!isExist) {
       throw new Error("Question not found");
     }
-    await Exams.updateOne(
-      { _id: isExist.exam },
-      { $pull: { questions: id } }
-    );
+    await Exams.updateOne({ _id: isExist.exam }, { $pull: { questions: id } });
 
     await Questions.findByIdAndDelete(id);
 
@@ -102,7 +108,7 @@ export const getAllQuestions = async (exam) => {
 };
 export const getQuestionById = async (id) => {
   try {
-    const question = await Questions.findById(id).populate('options');
+    const question = await Questions.findById(id).populate("options");
     if (!question) {
       throw new Error("Question not found");
     }
@@ -111,4 +117,3 @@ export const getQuestionById = async (id) => {
     throw new Error(`Error retrieving question: ${error.message}`);
   }
 };
-

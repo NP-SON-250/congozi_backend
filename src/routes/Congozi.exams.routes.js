@@ -8,11 +8,11 @@ import {
   getExamNumber,
 } from "../controllers/Congozi.exams.controllers";
 import fileUpload from "../helper/multer";
-import { admins,supperAdmins } from "../middleware/middleware";
+import { normal,admins,supperAdmins } from "../middleware/middleware";
 
 const examRoute = express.Router();
-examRoute.post("/", fileUpload.single("title"), createExamination);
-examRoute.put("/:id", fileUpload.single("title"), updateExam);
+examRoute.post("/", normal,fileUpload.single("title"), createExamination);
+examRoute.put("/:id",normal, fileUpload.single("title"), updateExam);
 examRoute.delete("/:id",supperAdmins, deleteExam);
 examRoute.get("/", getAllExams);
 examRoute.get("/:id", getExamById);
