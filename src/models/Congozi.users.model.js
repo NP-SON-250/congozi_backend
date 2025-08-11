@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const usersSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   fName: { type: String },
   lName: { type: String },
   idCard: { type: String },
@@ -27,6 +27,6 @@ const usersSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const Users = mongoose.models.users || mongoose.model("users", usersSchema);
+const Users = mongoose.models.user || mongoose.model("user", userSchema);
 
 export default Users;

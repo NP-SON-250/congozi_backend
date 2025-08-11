@@ -6,7 +6,7 @@ const paymentSchema = new mongoose.Schema({
     required: true,
     refPath: "itemType",
   },
-  paidBy: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+  paidBy: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
   amount: { type: String },
   accessCode: { type: String },
   startDate: { type: Date },

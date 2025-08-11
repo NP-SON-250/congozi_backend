@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 const notifySchema = new mongoose.Schema({
-  notifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+  notifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
   ownerName: { type: String },
   noteTitle: { type: String },
   purchasedItem: { type: mongoose.Schema.Types.ObjectId, ref: "purchases" },
