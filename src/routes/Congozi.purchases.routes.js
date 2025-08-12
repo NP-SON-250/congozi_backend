@@ -5,16 +5,21 @@ import {
   getUserAdmin,
   getUserComplete,
   getLoggedInUserSinglePurchase,
-  deleteLoggedInUserPurchase,
+  deleteUserPurchase,
   updatedPurchase,
   examByCode,
-  purchasedAndPaidItem,
   getUserPurchase,
-  deleteAccessCodePurchase,
+  updateAccessCodePurchase,
   getAllUserPayments,
 } from "../controllers/Congozi.purchases.controllers";
 import fileUpload from "../helper/multer";
-import { admins, students, schools, normal, supperAdmins } from "../middleware/middleware";
+import {
+  admins,
+  students,
+  schools,
+  normal,
+  supperAdmins,
+} from "../middleware/middleware";
 
 const purchaseRoute = express.Router();
 
@@ -29,12 +34,6 @@ purchaseRoute.get("/", getUserAdmin);
 
 // POST routes
 purchaseRoute.post(
-  "/paid/:itemId",
-  fileUpload.single("status"),
-  normal,
-  purchasedAndPaidItem
-);
-purchaseRoute.post(
   "/:itemId",
   fileUpload.single("status"),
   normal,
@@ -45,7 +44,7 @@ purchaseRoute.post(
 purchaseRoute.put("/:id", fileUpload.single("status"), updatedPurchase);
 
 // DELETE route
-purchaseRoute.delete("/:purchaseId", supperAdmins, deleteLoggedInUserPurchase);
-purchaseRoute.delete("/access/:accessCode", deleteAccessCodePurchase);
+purchaseRoute.delete("/:paymentsId", supperAdmins, deleteUserPurchase);
+purchaseRoute.put("/access/:accessCode", updateAccessCodePurchase);
 
 export default purchaseRoute;

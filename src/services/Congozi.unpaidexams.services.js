@@ -2,7 +2,7 @@ import UnpaidExams from "../models/Congozi.unpaidexams.models";
 
 export const getUserUnpaidExams = async (userId) => {
   try {
-    const exams = await UnpaidExams.find({ paidBy: userId, status: { $ne: "complete" } })
+    const exams = await UnpaidExams.find({ paidBy: userId, status: "pending" })
       .populate({
         path: "exam",
       })

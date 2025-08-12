@@ -1,34 +1,151 @@
+import UnpaidAccounts from "../models/Congozi.unpaidaccounts.models";
+import UnpaidExams from "../models/Congozi.unpaidexams.models";
+import WaittingAccounts from "../models/Congozi.waittingaccounts.models";
+import WaittingExams from "../models/Congozi.waittingexams.models";
+import payments from "../models/Congozi.payments.models";
+import Exams from "../models/Congozi.exams.models";
+import Accounts from "../models/Congozi.accounts.models";
+import TotalUserExams from "../models/Congozi.totaluserexams.models";
+import TotalUserAccounts from "../models/Congozi.totaluseraccounts.models";
+import PassedExams from "../models/Congozi.passedexams.models";
+import FailledExams from "../models/Congozi.failedexams.models";
+import ExpiredExams from "../models/Congozi.expiredexams.models";
+import ExpiredAccounts from "../models/Congozi.expiredaccounts.models";
+
 import * as purchaseServices from "../services/Congozi.purchases.services";
 import {
   validateCreatePurchase,
   validateUpdatePurchase,
 } from "../validation/Congozi.purchases.validation";
-export const purchasedItem = async (req, res) => {
-  const { error, value } = validateCreatePurchase(req.body);
-  if (error) {
-    return res.status(400).json({ message: error.details[0].message });
+const generateAccessCode = () => {
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const alphanum = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  let code = letters[Math.floor(Math.random() * letters.length)];
+
+  for (let i = 0; i < 11; i++) {
+    code += alphanum[Math.floor(Math.random() * alphanum.length)];
   }
 
+  return code;
+};
+export const purchasedItem = async (req, res) => {
   try {
     const userId = req.loggedInUser.id;
     const userRole = req.loggedInUser.role;
     const { itemId } = req.params;
-    const result = await purchaseServices.makepayments(
-      userId,
-      userRole,
+
+    let itemType = null;
+    let itemFees = null;
+    let item = await Exams.findById(itemId);
+
+    if (item) {
+      itemType = "exams";
+      itemFees = item.fees;
+    } else {
+      item = await Accounts.findById(itemId);
+      if (item) {
+        itemType = "accounts";
+        itemFees = item.fees;
+      }
+    }
+
+    if (!itemType || !item) {
+      return res.status(404).json({
+        status: "404",
+        message: `${itemType} ntibonetse kuboneka.`,
+      });
+    }
+    if (userRole === "student" && itemType !== "exams") {
+      return res.status(404).json({
+        status: "403",
+        message: "Ikizamini kigurwa n'umunyeshuri gusa.",
+      });
+    }
+
+    if (userRole === "school" && itemType !== "accounts") {
+      return res.status(404).json({
+        status: "403",
+        message: `Konte igurwa na n'ikigo gusa.`,
+      });
+    }
+    const duplicate = await payments.findOne({ itemId, status: "pending" });
+    if (duplicate.itemType === "accounts") {
+      return res.status(400).json({
+        status: "400",
+        message: `Iyi konte usanzwe warayisabye`,
+      });
+    }
+    if (duplicate.itemType === "exams") {
+      return res.status(400).json({
+        status: "400",
+        message: `Icyi kizamini usanzwe waracyisabye`,
+      });
+    }
+    const savedpayments = await payments.create({
+      itemType,
       itemId,
-      value
-    );
+      paidBy: userId,
+      amount: itemFees,
+      accessCode: generateAccessCode(),
+      startDate: null,
+      endDate: null,
+    });
+
+    if (savedpayments) {
+      let items = null;
+      if (savedpayments.itemType === "exams") {
+        items = await Exams.findById(savedpayments.itemId);
+      } else if (savedpayments.itemType === "accounts") {
+        items = await Accounts.findById(savedpayments.itemId);
+      }
+      let endDate = null;
+      if (savedpayments.itemType === "accounts" && savedpayments.validIn) {
+        const days = parseInt(item.validIn.replace(/\D/g, ""));
+        endDate = new Date();
+        endDate.setDate(endDate.getDate() + days);
+      }
+      if (itemType === "exams") {
+        await UnpaidExams.create({
+          exam: itemId,
+          paidBy: userId,
+          status: "pending",
+          purchaseId: savedpayments._id,
+        });
+      } else if (itemType === "accounts") {
+        await UnpaidAccounts.create({
+          account: itemId,
+          paidBy: userId,
+          status: "pending",
+          purchaseId: savedpayments._id,
+        });
+      }
+      if (itemType === "exams") {
+        await TotalUserExams.create({
+          exam: itemId,
+          accessCode: savedpayments.accessCode,
+          purchaseId: savedpayments._id,
+          paidBy: userId,
+        });
+      } else if (itemType === "accounts") {
+        await TotalUserAccounts.create({
+          account: itemId,
+          accessCode: savedpayments.accessCode,
+          purchaseId: savedpayments._id,
+          paidBy: userId,
+        });
+      }
+    }
     return res.status(201).json({
       status: "201",
-      message: "Purchase created",
-      data: result,
+      message: `Gusaba igura rya ${itemType} byakunze`,
+      data: savedpayments,
     });
   } catch (err) {
     console.error(err);
     return res.status(500).json({
       status: "500",
-      message: "Internal server error",
+      message: `Kugura ${itemType} biranze`,
       error: err.message,
     });
   }
@@ -228,45 +345,90 @@ export const getLoggedInUserSinglePurchase = async (req, res) => {
   }
 };
 
-export const deleteLoggedInUserPurchase = async (req, res) => {
+export const deleteUserPurchase = async (req, res) => {
   try {
-    const { purchaseId } = req.params;
+    const { paymentsId } = req.params;
 
-    const result = await purchaseServices.deleteUserpayments(purchaseId);
+    const payment = await payments.findById(paymentsId);
+    if (!payment) {
+      return res.status(404).json({
+        status: "404",
+        message: "Payment Not found",
+      });
+    }
+    const result = await payments.findByIdAndDelete(paymentsId);
+    const itemId = payment.itemId;
+    await UnpaidExams.deleteOne({
+      exam: itemId,
+    });
+    await WaittingExams.deleteOne({
+      exam: itemId,
+    });
 
+    await PassedExams.deleteOne({
+      exam: itemId,
+    });
+    await FailledExams.deleteOne({
+      exam: itemId,
+    });
+    await ExpiredExams.deleteOne({
+      exam: itemId,
+    });
+    await TotalUserExams.deleteOne({
+      exam: itemId,
+    });
+    await WaittingAccounts.deleteOne({
+      account: itemId,
+    });
+    await UnpaidAccounts.deleteOne({
+      account: itemId,
+    });
+    await TotalUserAccounts.deleteOne({
+      account: itemId,
+    });
+    await ExpiredAccounts.deleteOne({
+      account: itemId,
+    });
     return res.status(200).json({
       status: "200",
-      message: "Purchase deleted",
+      message: "payment deleted",
       data: result,
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       status: "500",
-      message: "Purchase not found",
+      message: "Failed to delete payment",
       error: error.message,
     });
   }
 };
 
-export const deleteAccessCodePurchase = async (req, res) => {
+export const updateAccessCodePurchase = async (req, res) => {
   try {
     const { accessCode } = req.params;
-
-    const result = await purchaseServices.deleteUserpaymentsByAccessCode(
-      accessCode
-    );
-
+    const payment = await payments.findOne({ accessCode });
+    if (!payment) {
+      return res.status(404).json({
+        status: "404",
+        message: "Payment not found",
+      });
+    }
+    const id = payment._id;
+    const endDate = new Date();
+    const updatepayment = await payments.findByIdAndUpdate(id, {
+      status: "expired",
+      endDate: endDate,
+    });
+    await WaittingExams.deleteOne({ accessCode });
     return res.status(200).json({
-      status: "200",
-      message: "Purchase deleted",
-      data: result,
+      message: "Purchase updated",
+      data: updatepayment,
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
+    res.status(500).json({
       status: "500",
-      message: "Purchase not found",
+      message: "Internal server error",
       error: error.message,
     });
   }
