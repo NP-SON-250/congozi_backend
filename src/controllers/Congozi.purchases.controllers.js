@@ -70,13 +70,13 @@ export const purchasedItem = async (req, res) => {
       });
     }
     const duplicate = await payments.findOne({ itemId, status: "pending" });
-    if (duplicate.itemType === "accounts") {
+    if (duplicate && duplicate.itemType === "accounts") {
       return res.status(400).json({
         status: "400",
         message: `Iyi konte usanzwe warayisabye`,
       });
     }
-    if (duplicate.itemType === "exams") {
+    if (duplicate && duplicate.itemType === "exams") {
       return res.status(400).json({
         status: "400",
         message: `Icyi kizamini usanzwe waracyisabye`,
