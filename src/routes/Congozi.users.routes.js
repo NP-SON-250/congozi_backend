@@ -34,7 +34,7 @@ userRoute.post("/verify-password", normal, async (req, res) => {
   }
 });
 userRoute.post("/", fileUpload.single("profile"), createUsers);
-userRoute.put("/:id", normal, fileUpload.single("profile"), updateUser);
+userRoute.put("/:id", fileUpload.single("profile"), updateUser);
 userRoute.delete("/:id", supperAdmins, deleteUser);
 
 export default userRoute;
