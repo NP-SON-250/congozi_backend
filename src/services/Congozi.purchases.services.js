@@ -122,6 +122,7 @@ export const getAllPayments = async (userId) => {
     const pendingpayments = await payments
       .find({
         paidBy: userId,
+        status: { $ne: "expired" },
       })
       .populate("paidBy")
       .populate("itemId")
