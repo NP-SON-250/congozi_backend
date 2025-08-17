@@ -16,6 +16,6 @@ examRoute.put("/:id",normal, fileUpload.single("title"), updateExam);
 examRoute.delete("/:id",supperAdmins, deleteExam);
 examRoute.get("/", getAllExams);
 examRoute.get("/:id", getExamById);
-examRoute.get("/kora/:number", getExamNumber);
+examRoute.get("/kora/:number",normal, getExamNumber);
 
 export default examRoute;

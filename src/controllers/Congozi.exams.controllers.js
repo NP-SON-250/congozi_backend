@@ -3,21 +3,56 @@ import {
   validateCreateExam,
   validateUpdateExam,
 } from "../validation/Congozi.exams.validation";
-
+import Exams from "../models/Congozi.exams.models";
+import UnpaidExams from "../models/Congozi.unpaidexams.models";
 export const getExamNumber = async (req, res) => {
   try {
     const { number } = req.params;
-    const exam = await examsService.getExamByNumber(number);
+    const userId = req.loggedInUser.id;
+
+    // Find the exam
+    const exam = await Exams.findOne({
+      number: number,
+      type: "gukora" 
+    }).populate({
+      path: "questions",
+      populate: {
+        path: "options",
+        model: "options"
+      }
+    });
+
+    if (!exam) {
+      return res.status(404).json({
+        status: "404",
+        message: "Exam not found",
+      });
+    }
+
+    // Check for unpaid exam
+    const unpaidExam = await UnpaidExams.findOne({
+      exam: exam._id,
+      paidBy: userId,
+      status: "pending"
+    });
+
+    if (unpaidExam) {
+      return res.status(400).json({
+        status: "400",
+        message: "Ikikizamini waragisabye ariko ntikishyuwe. Banza ukishyure!!!",
+      });
+    }
 
     return res.status(200).json({
       status: "200",
-      message: "Exam retrieved",
+      message: `Ikizamin ${number} cyaje neza!!`,
       data: exam,
     });
   } catch (error) {
+    console.error("Error in getExamNumber:", error);
     return res.status(500).json({
       status: "500",
-      message: "Internal server error",
+      message: "habayemo ikibazo",
       error: error.message,
     });
   }
@@ -117,5 +152,3 @@ export const getExamById = async (req, res) => {
     });
   }
 };
-
-

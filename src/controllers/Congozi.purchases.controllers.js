@@ -69,7 +69,11 @@ export const purchasedItem = async (req, res) => {
         message: `Konte igurwa na n'ikigo gusa.`,
       });
     }
-    const duplicate = await payments.findOne({ itemId, status: "pending" });
+    const duplicate = await payments.findOne({
+      itemId: itemId,
+      status: "pending",
+      paidBy: userId,
+    });
     if (duplicate && duplicate.itemType === "accounts") {
       return res.status(400).json({
         status: "400",
@@ -84,7 +88,7 @@ export const purchasedItem = async (req, res) => {
     }
     const savedpayments = await payments.create({
       itemType,
-      itemId,
+      itemId: itemId,
       paidBy: userId,
       amount: itemFees,
       accessCode: generateAccessCode(),
@@ -146,36 +150,6 @@ export const purchasedItem = async (req, res) => {
     return res.status(500).json({
       status: "500",
       message: `Kugura ${itemType} biranze`,
-      error: err.message,
-    });
-  }
-};
-export const purchasedAndPaidItem = async (req, res) => {
-  const { error, value } = validateCreatePurchase(req.body);
-  if (error) {
-    return res.status(400).json({ message: error.details[0].message });
-  }
-
-  try {
-    const userId = req.loggedInUser.id;
-    const userRole = req.loggedInUser.role;
-    const { itemId } = req.params;
-    const result = await purchaseServices.makePaidpayments(
-      userId,
-      userRole,
-      itemId,
-      value
-    );
-    return res.status(201).json({
-      status: "201",
-      message: "Purchase and paid success",
-      data: result,
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({
-      status: "500",
-      message: "Internal server error",
       error: err.message,
     });
   }

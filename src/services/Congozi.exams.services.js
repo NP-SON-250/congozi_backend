@@ -8,27 +8,6 @@ import FailledExams from "../models/Congozi.failedexams.models";
 import ExpiredExams from "../models/Congozi.expiredexams.models";
 import TotalUserExams from "../models/Congozi.totaluserexams.models";
 
-export const getExamByNumber = async (number) => {
-  try {
-    const isExist = await Exams.findOne({
-      number,
-      type: { $regex: /^gukora$/, $options: "i" },
-    }).populate({
-      path: "questions",
-      populate: {
-        path: "options",
-        model: "options",
-      },
-    });
-    if (!isExist) {
-      throw new Error("Exam not found");
-    }
-    return isExist;
-  } catch (error) {
-    throw new Error(`Error retrieving exam: ${error.message}`);
-  }
-};
-
 export const createExam = async (examData) => {
   const { title, type, number, fees } = examData;
 
