@@ -333,7 +333,7 @@ export const deleteUserPurchase = async (req, res) => {
     const result = await payments.findByIdAndDelete(paymentsId);
     const itemId = payment.itemId;
     await UnpaidExams.deleteOne({
-      exam: itemId,
+      purchaseId: paymentsId,
     });
     await WaittingExams.deleteOne({
       exam: itemId,
@@ -349,13 +349,13 @@ export const deleteUserPurchase = async (req, res) => {
       exam: itemId,
     });
     await TotalUserExams.deleteOne({
-      exam: itemId,
+      purchaseId: paymentsId,
     });
     await WaittingAccounts.deleteOne({
       account: itemId,
     });
     await UnpaidAccounts.deleteOne({
-      account: itemId,
+      purchaseId: paymentsId,
     });
     await TotalUserAccounts.deleteOne({
       account: itemId,
